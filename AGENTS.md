@@ -38,13 +38,22 @@ docker run -d --name dm-mssql -e ACCEPT_EULA=1 -e MSSQL_SA_PASSWORD='…' -p 114
     parser of CREATE TABLE and ALTER TABLE … ADD CONSTRAINT; `Guess` says which dialect a script is in), `Catalogs`
     (live catalogs: SQL Server's sys views, PostgreSQL's pg_catalog, SQLite's pragmas; never a row), `SchemaFiles`
     (a SQLite file or a DDL script) and `SavedConnections` (connection strings by name, in the settings folder).
-  - `Mapping/`: `MapFile` (the `.dmap`: `Side`, `TableMap`, `ColumnMap` with its `ColumnKind`, `Decision`),
-    `Transforms` (what a column map does to a row's values).
-- `src/AVADataMapper/`: the window, built in code (`MainWindow.cs`: the trees, the mapping tab, undo; the partial
+  - `Mapping/`: `MapFile` (the `.dmap`: `Side`, `TableMap`, `ColumnMap` with its `ColumnKind` and `Certainty`,
+    `Decision`), `Transforms` (what a column map does to a row's values), `Names` (names as words: prefixes dropped,
+    abbreviations spelled out, synonyms read the same), `Evidence` (an AVALegacyLens `.lens` read as plain JSON: who
+    writes and reads each column, its rules tied to the columns their words name, dead tables), `Suggester` (fills a
+    mapping's gaps: tables by name and columns, columns by name and type, keys through foreign keys, lookups into code
+    tables, splits of a name column; each sure, likely or guessed, with its reason), `Coverage` (what's filled, what's
+    required and empty, what's suggested, what's old and not read or dropped).
+- `src/AVADataMapper/`: the window, built in code (`MainWindow.cs`: the trees, the mapping tab, undo;
+  `MainWindow.Suggest.cs`: suggesting, confirming, the scan as evidence, the Coverage tab; `MainWindow.Parts.cs`: the
   hooks later parts fill; `ConnectDialog.cs`).
 - `tests/AVADataMapper.Tests/`: xUnit v3 on Avalonia.Headless. `LiveDatabases.cs` has the opt-in live servers.
 - `samples/`: an invented legacy clinic database (`old/`: SQL Server DDL and rows, and a SQLite copy) and its rebuild
   (`new/`: PostgreSQL DDL, a SQLite copy), from `make_samples.py`; `clinic.dmap` maps one to the other.
+  `old/code/` is the legacy program's (invented) VB.NET that uses the old database, and `old/clinic-old.lens` is
+  AVALegacyLens's real scan of it with the old schema (its `root` set to ClinicOld): scan a folder holding `code/` and
+  the T-SQL schema, without the rows script, whose INSERTs would make every column look written.
 
 ## Rules that keep it working
 
@@ -53,7 +62,11 @@ docker run -d --name dm-mssql -e ACCEPT_EULA=1 -e MSSQL_SA_PASSWORD='…' -p 114
 - **A mapping never holds a connection string.** Sides name a file or a saved connection ("old", "new");
   `SavedConnections` keeps the strings in the settings folder, readable by the owner only.
 - **A `.dmap` writes the same way every time** (`MapFile.ToJson`), so it diffs well in source control.
-- **Every change to the mapping is one undo step** (`MainWindow.Change`).
+- **Every change to the mapping is one undo step** (`MainWindow.Change`), suggestions included.
+- **Suggestions never change what's mapped.** `Suggester` only fills gaps, marks everything it adds sure, likely or
+  guessed with a reason, and a person confirms it. Evidence makes a suggestion likelier; it never confirms one.
+- **A window test that fails leaves its window open, and Avalonia's reset then fails with `fonts:SystemFonts`,** which
+  hides the real failure and breaks the tests after it: close windows in `finally`.
 - **No real data in the repository.** Every person, payer and number in the samples is invented.
 
 ## Making a change

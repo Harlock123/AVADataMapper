@@ -183,6 +183,9 @@ public sealed class MapFile
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("source")] public Side Source { get; set; } = new() { Name = "old" };
     [JsonPropertyName("target")] public Side Target { get; set; } = new() { Name = "new" };
+
+    /// <summary>An AVALegacyLens scan of the old system (.lens), relative to the map file: evidence for suggestions and drops.</summary>
+    [JsonPropertyName("evidence")] public string? Evidence { get; set; }
     [JsonPropertyName("tables")] public List<TableMap> Tables { get; set; } = [];
     [JsonPropertyName("decisions")] public List<Decision> Decisions { get; set; } = [];
 

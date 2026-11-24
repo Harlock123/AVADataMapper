@@ -209,6 +209,7 @@ public sealed partial class MainWindow : Window
         var head = new StackPanel { Spacing = 6, Margin = new Thickness(16, 12, 16, 8) };
         head.Children.Add(TableTitle);
         head.Children.Add(TableNote);
+        head.Children.Add(EvidenceText);
         var source = new WrapPanel();
         source.Children.Add(new TextBlock { Text = "Rows from", Foreground = Look.Dim, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
         source.Children.Add(SourceBox);
@@ -244,6 +245,7 @@ public sealed partial class MainWindow : Window
         Map = new MapFile();
         MapPath = null;
         Old = New = null;
+        Evidence = null;
         _table = _column = null;
         _undo.Clear();
         _redo.Clear();
@@ -265,6 +267,7 @@ public sealed partial class MainWindow : Window
             _table = Map.Tables.FirstOrDefault()?.Target;
             _column = null;
             var said = new List<string>();
+            LoadEvidence();
             Old = LoadSide(Map.Source, said);
             New = LoadSide(Map.Target, said);
             Refresh();
@@ -357,6 +360,7 @@ public sealed partial class MainWindow : Window
             // Files the sides read stay found: relative to where the mapping is now.
             foreach (var side in new[] { Map.Source, Map.Target })
                 if (MapFile.FullPath(side, MapPath) is { } f) side.File = Path.GetRelativePath(Path.GetDirectoryName(full)!, f).Replace('\\', '/');
+            if (Map.Evidence != null && MapFile.FullPath(new Side { File = Map.Evidence }, MapPath) is { } ev) Map.Evidence = Path.GetRelativePath(Path.GetDirectoryName(full)!, ev).Replace('\\', '/');
             Map.Save(full);
             MapPath = full;
             Dirty = false;
@@ -583,7 +587,7 @@ public sealed partial class MainWindow : Window
         foreach (var t in New?.Tables ?? [])
         {
             var tm = Map.Table(t.Name);
-            var (done, of) = Coverage(t, tm);
+            var (done, of) = Filled(t, tm);
             var p = new StackPanel { Spacing = 1 };
             p.Children.Add(new TextBlock { Text = t.Name, Foreground = Look.Text, FontWeight = FontWeight.SemiBold });
             p.Children.Add(new TextBlock
@@ -598,7 +602,7 @@ public sealed partial class MainWindow : Window
     }
 
     /// <summary>How many of a new table's columns are filled (identity columns fill themselves), out of how many.</summary>
-    public static (int Done, int Of) Coverage(Table t, TableMap? tm) =>
+    public static (int Done, int Of) Filled(Table t, TableMap? tm) =>
         (t.Columns.Count(c => c.Identity || tm?.Column(c.Name) != null), t.Columns.Count);
 
     /// <summary>Shows a new table's mapping: its source, filter and every column with how it's filled.</summary>
@@ -623,7 +627,7 @@ public sealed partial class MainWindow : Window
                 ColumnJsonTitle.Text = "";
                 return;
             }
-            var (done, of) = Coverage(table, tm);
+            var (done, of) = Filled(table, tm);
             TableNote.Text = $"{done} of {of} columns filled" + (table.ForeignKeys.Count > 0 ? " · refers to " + string.Join(", ", table.ForeignKeys.Select(f => f.RefTable).Distinct()) : "") + (tm?.Reason is { } r ? " · " + r : "");
             var sources = new List<string> { "(rows given: a code table)" };
             sources.AddRange(Old?.Tables.Select(t => t.Name) ?? []);
@@ -681,6 +685,7 @@ public sealed partial class MainWindow : Window
         {
             _filling = false;
         }
+        ShowEvidence();
     }
 
     /// <summary>A column map in words: "split PatName at ',', part 1, trimmed".</summary>

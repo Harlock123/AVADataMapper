@@ -31,8 +31,32 @@ public sealed class Screenshots
         {
             foreach (var item in w.OldTree.Items.OfType<TreeViewItem>().Take(2)) item.IsExpanded = true;
             foreach (var item in w.NewTree.Items.OfType<TreeViewItem>().Skip(3).Take(1)) item.IsExpanded = true;
-            w.ShowTable("patient", "birth_date");
+            w.ShowTable("patient", "family_name");
             Save(w, Path.Combine(dir, "mapping.png"));
+            w.Tabs.SelectedIndex = 1;
+            Save(w, Path.Combine(dir, "coverage-done.png"));
+        }
+        finally { w.Close(); }
+    });
+
+    [Fact]
+    public void Suggested() => HeadlessApp.Run(() =>
+    {
+        if (Environment.GetEnvironmentVariable("MAPPER_SHOTS") is not { Length: > 0 } dir) return;
+        Directory.CreateDirectory(dir);
+        var w = new MainWindow { Width = 1500, Height = 900 };
+        w.Show();
+        try
+        {
+            w.OpenSchema(true, Samples.Path("old/clinic-old.db"));
+            w.OpenSchema(false, Samples.Path("new/clinic-new.pg.sql"));
+            w.OpenEvidence(Samples.Path("old/clinic-old.lens"));
+            w.Suggest();
+            w.Confirm(sureOnly: true);
+            w.ShowTable("patient", "family_name");
+            Save(w, Path.Combine(dir, "suggested.png"));
+            w.Tabs.SelectedIndex = 1;
+            Save(w, Path.Combine(dir, "coverage.png"));
         }
         finally { w.Close(); }
     });

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The legacy clinic program's code (invented), as far as it touches the database: for AVALegacyLens to scan. -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>ClinicOld</RootNamespace>
+  </PropertyGroup>
+</Project>

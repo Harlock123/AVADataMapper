@@ -101,3 +101,51 @@ public sealed class WindowTests
         again.Close();
     });
 }
+
+public sealed class SuggestWindowTests
+{
+    [Fact]
+    public void Suggestions_fill_an_empty_mapping_and_are_confirmed_dropped_and_undone_from_the_window() => HeadlessApp.Run(() =>
+    {
+        var root = Samples.Copy();
+        var w = new MainWindow();
+        w.Show();
+        try
+        {
+        w.OpenSchema(true, Path.Combine(root, "old", "clinic-old.db"));
+        w.OpenSchema(false, Path.Combine(root, "new", "clinic-new.pg.sql"));
+        w.OpenEvidence(Path.Combine(root, "old", "clinic-old.lens"));
+        Assert.StartsWith("The old system's code (clinic-old.lens) is evidence now", w.txtStatusBar.Text);
+        Assert.Contains(w.CoverageItems, i => i.Section == Core.Mapping.Coverage.Unmapped);
+
+        var r = w.Suggest()!;
+        Assert.Equal((7, 32), (r.Tables, r.Columns));
+        Assert.StartsWith("Suggested 7 tables and 32 columns", w.txtStatusBar.Text);
+        Assert.Contains(w.CoverageItems, i => i.Section == Core.Mapping.Coverage.Required && i.About == "claim.source_system");
+        w.ShowTable("patient", "family_name");
+        Assert.Contains("rule: \"Enter the name as LAST, FIRST.\"", w.EvidenceText.Text);
+
+        // Confirming the sure ones leaves the likely ones (amber) to check.
+        var sure = w.Confirm(sureOnly: true);
+        Assert.True(sure > 20);
+        Assert.Equal(Certainty.Likely, w.Map.Table("patient")!.Column("birth_date")!.Certainty);
+        Assert.Equal(1, w.Confirm("patient", "birth_date"));
+        Assert.Equal(Certainty.Confirmed, w.Map.Table("patient")!.Column("birth_date")!.Certainty);
+
+        w.Drop("tblPatient.Fax", "Dropped: nobody faxes now.");
+        Assert.Contains(w.CoverageItems, i => i.Section == Core.Mapping.Coverage.Dropped && i.About == "tblPatient.Fax");
+        var text = string.Join("\n", w.CoveragePanel.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text));
+        Assert.Contains("Old code: FaxQueue: no code reads or writes this table", text);
+        Assert.Contains("Dropped: nobody faxes now.", text);
+
+        // The suggestions were one step: undone, they're all gone.
+        w.Undo(); w.Undo(); w.Undo(); w.Undo();
+        Assert.Empty(w.Map.Tables);
+        var saved = Path.Combine(root, "suggested.dmap");
+        w.Redo(); w.Redo();
+        w.SaveMap(saved);
+        Assert.Equal("old/clinic-old.lens", MapFile.Load(saved).Evidence);
+        }
+        finally { w.Close(); }
+    });
+}

@@ -1,0 +1,1500 @@
+{
+  "version": 1,
+  "root": "ClinicOld",
+  "scannedAt": "2026-11-24T14:28:26.282444-05:00",
+  "nodes": [
+    {
+      "id": "ClinicOld:M:ClinicOld.Billing.#ctor(SqlConnection)",
+      "kind": "Method",
+      "name": "New",
+      "parent": "ClinicOld:T:ClinicOld.Billing",
+      "file": "Billing.vb",
+      "line": 7,
+      "endLine": 9,
+      "language": "VB.NET",
+      "props": {
+        "type": "Billing",
+        "project": "ClinicOld",
+        "signature": "Sub Billing.New(db As SqlConnection)",
+        "access": "Public",
+        "parameters": "1",
+        "subkind": "constructor",
+        "lines": "3",
+        "complexity": "1"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.Billing.CopayPercent(System.Int32)",
+      "kind": "Method",
+      "name": "CopayPercent",
+      "parent": "ClinicOld:T:ClinicOld.Billing",
+      "file": "Billing.vb",
+      "line": 25,
+      "endLine": 29,
+      "language": "VB.NET",
+      "props": {
+        "type": "Billing",
+        "project": "ClinicOld",
+        "signature": "Function Billing.CopayPercent(patient As Integer) As Decimal",
+        "access": "Private",
+        "parameters": "1",
+        "subkind": "function",
+        "lines": "5",
+        "complexity": "1",
+        "sql": "embedded"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.Billing.EnterClaim(System.String,System.Int32,System.Decimal)",
+      "kind": "Method",
+      "name": "EnterClaim",
+      "parent": "ClinicOld:T:ClinicOld.Billing",
+      "file": "Billing.vb",
+      "line": 31,
+      "endLine": 37,
+      "language": "VB.NET",
+      "props": {
+        "type": "Billing",
+        "project": "ClinicOld",
+        "signature": "Sub Billing.EnterClaim(number As String, patient As Integer, amount As Decimal)",
+        "access": "Public",
+        "parameters": "3",
+        "subkind": "method",
+        "lines": "7",
+        "complexity": "1",
+        "sql": "embedded"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "kind": "Method",
+      "name": "PostCharge",
+      "parent": "ClinicOld:T:ClinicOld.Billing",
+      "file": "Billing.vb",
+      "line": 11,
+      "endLine": 23,
+      "language": "VB.NET",
+      "props": {
+        "type": "Billing",
+        "project": "ClinicOld",
+        "signature": "Sub Billing.PostCharge(patient As Integer, visit As Integer, procedureCode As String, amount As Decimal)",
+        "access": "Public",
+        "parameters": "4",
+        "subkind": "method",
+        "lines": "13",
+        "complexity": "2",
+        "sql": "embedded"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.Billing.RecordVisit(System.Int32,System.String,System.String)",
+      "kind": "Method",
+      "name": "RecordVisit",
+      "parent": "ClinicOld:T:ClinicOld.Billing",
+      "file": "Billing.vb",
+      "line": 51,
+      "endLine": 57,
+      "language": "VB.NET",
+      "props": {
+        "type": "Billing",
+        "project": "ClinicOld",
+        "signature": "Sub Billing.RecordVisit(patient As Integer, clinician As String, reason As String)",
+        "access": "Public",
+        "parameters": "3",
+        "subkind": "method",
+        "lines": "7",
+        "complexity": "1",
+        "sql": "embedded"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.Billing.SetClaimStatus(System.String,System.String)",
+      "kind": "Method",
+      "name": "SetClaimStatus",
+      "parent": "ClinicOld:T:ClinicOld.Billing",
+      "file": "Billing.vb",
+      "line": 39,
+      "endLine": 49,
+      "language": "VB.NET",
+      "props": {
+        "type": "Billing",
+        "project": "ClinicOld",
+        "signature": "Sub Billing.SetClaimStatus(number As String, status As String)",
+        "access": "Public",
+        "parameters": "2",
+        "subkind": "method",
+        "lines": "11",
+        "complexity": "2",
+        "sql": "embedded"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.PatientScreen.#ctor(SqlConnection)",
+      "kind": "Method",
+      "name": "New",
+      "parent": "ClinicOld:T:ClinicOld.PatientScreen",
+      "file": "PatientScreen.vb",
+      "line": 7,
+      "endLine": 9,
+      "language": "VB.NET",
+      "props": {
+        "type": "PatientScreen",
+        "project": "ClinicOld",
+        "signature": "Sub PatientScreen.New(db As SqlConnection)",
+        "access": "Public",
+        "parameters": "1",
+        "subkind": "constructor",
+        "lines": "3",
+        "complexity": "1"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.PatientScreen.DeletePatient(System.Int32)",
+      "kind": "Method",
+      "name": "DeletePatient",
+      "parent": "ClinicOld:T:ClinicOld.PatientScreen",
+      "file": "PatientScreen.vb",
+      "line": 32,
+      "endLine": 36,
+      "language": "VB.NET",
+      "props": {
+        "type": "PatientScreen",
+        "project": "ClinicOld",
+        "signature": "Sub PatientScreen.DeletePatient(id As Integer)",
+        "access": "Public",
+        "parameters": "1",
+        "subkind": "method",
+        "lines": "5",
+        "complexity": "1",
+        "sql": "embedded"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "kind": "Method",
+      "name": "FindPatients",
+      "parent": "ClinicOld:T:ClinicOld.PatientScreen",
+      "file": "PatientScreen.vb",
+      "line": 38,
+      "endLine": 44,
+      "language": "VB.NET",
+      "props": {
+        "type": "PatientScreen",
+        "project": "ClinicOld",
+        "signature": "Function PatientScreen.FindPatients(text As String) As DataTable",
+        "access": "Public",
+        "parameters": "1",
+        "subkind": "function",
+        "lines": "7",
+        "complexity": "1",
+        "sql": "embedded"
+      }
+    },
+    {
+      "id": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "kind": "Method",
+      "name": "SavePatient",
+      "parent": "ClinicOld:T:ClinicOld.PatientScreen",
+      "file": "PatientScreen.vb",
+      "line": 11,
+      "endLine": 30,
+      "language": "VB.NET",
+      "props": {
+        "type": "PatientScreen",
+        "project": "ClinicOld",
+        "signature": "Sub PatientScreen.SavePatient(name As String, birth As String, sex As String, payer As String, active As Boolean, phone As String, user As String)",
+        "access": "Public",
+        "parameters": "7",
+        "subkind": "method",
+        "lines": "20",
+        "complexity": "7",
+        "sql": "embedded"
+      }
+    },
+    {
+      "id": "ClinicOld:T:ClinicOld.Billing",
+      "kind": "Type",
+      "name": "Billing",
+      "parent": "file:Billing.vb",
+      "file": "Billing.vb",
+      "line": 4,
+      "endLine": 58,
+      "language": "VB.NET",
+      "props": {
+        "fullName": "ClinicOld.Billing",
+        "subkind": "class",
+        "access": "Public",
+        "project": "ClinicOld",
+        "files": "Billing.vb"
+      }
+    },
+    {
+      "id": "ClinicOld:T:ClinicOld.PatientScreen",
+      "kind": "Type",
+      "name": "PatientScreen",
+      "parent": "file:PatientScreen.vb",
+      "file": "PatientScreen.vb",
+      "line": 4,
+      "endLine": 45,
+      "language": "VB.NET",
+      "props": {
+        "fullName": "ClinicOld.PatientScreen",
+        "subkind": "class",
+        "access": "Public",
+        "project": "ClinicOld",
+        "files": "PatientScreen.vb"
+      }
+    },
+    {
+      "id": "db:dbo.faxqueue",
+      "kind": "Table",
+      "name": "FaxQueue",
+      "parent": "file:Database/schema.sql",
+      "file": "Database/schema.sql",
+      "line": 58,
+      "endLine": 63,
+      "language": "T-SQL",
+      "props": {
+        "schema": "dbo",
+        "subkind": "table",
+        "lines": "6",
+        "dead": "true"
+      }
+    },
+    {
+      "id": "db:dbo.faxqueue.document",
+      "kind": "Column",
+      "name": "Document",
+      "parent": "db:dbo.faxqueue",
+      "file": "Database/schema.sql",
+      "line": 61,
+      "endLine": 61,
+      "language": "T-SQL",
+      "props": {
+        "table": "FaxQueue",
+        "type": "varbinary(max)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.faxqueue.faxid",
+      "kind": "Column",
+      "name": "FaxId",
+      "parent": "db:dbo.faxqueue",
+      "file": "Database/schema.sql",
+      "line": 59,
+      "endLine": 59,
+      "language": "T-SQL",
+      "props": {
+        "table": "FaxQueue",
+        "type": "int",
+        "nullable": "false",
+        "identity": "true",
+        "key": "primary"
+      }
+    },
+    {
+      "id": "db:dbo.faxqueue.number",
+      "kind": "Column",
+      "name": "Number",
+      "parent": "db:dbo.faxqueue",
+      "file": "Database/schema.sql",
+      "line": 60,
+      "endLine": 60,
+      "language": "T-SQL",
+      "props": {
+        "table": "FaxQueue",
+        "type": "varchar(20)",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblcharge",
+      "kind": "Table",
+      "name": "tblCharge",
+      "parent": "file:Database/schema.sql",
+      "file": "Database/schema.sql",
+      "line": 36,
+      "endLine": 46,
+      "language": "T-SQL",
+      "props": {
+        "schema": "dbo",
+        "subkind": "table",
+        "lines": "11"
+      }
+    },
+    {
+      "id": "db:dbo.tblcharge.amt",
+      "kind": "Column",
+      "name": "Amt",
+      "parent": "db:dbo.tblcharge",
+      "file": "Database/schema.sql",
+      "line": 41,
+      "endLine": 41,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblCharge",
+        "type": "money",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblcharge.chgid",
+      "kind": "Column",
+      "name": "ChgID",
+      "parent": "db:dbo.tblcharge",
+      "file": "Database/schema.sql",
+      "line": 37,
+      "endLine": 37,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblCharge",
+        "type": "int",
+        "nullable": "false",
+        "identity": "true",
+        "key": "primary"
+      }
+    },
+    {
+      "id": "db:dbo.tblcharge.copay",
+      "kind": "Column",
+      "name": "Copay",
+      "parent": "db:dbo.tblcharge",
+      "file": "Database/schema.sql",
+      "line": 42,
+      "endLine": 42,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblCharge",
+        "type": "money",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblcharge.patid",
+      "kind": "Column",
+      "name": "PatID",
+      "parent": "db:dbo.tblcharge",
+      "file": "Database/schema.sql",
+      "line": 38,
+      "endLine": 38,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblCharge",
+        "type": "int",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblcharge.postedon",
+      "kind": "Column",
+      "name": "PostedOn",
+      "parent": "db:dbo.tblcharge",
+      "file": "Database/schema.sql",
+      "line": 43,
+      "endLine": 43,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblCharge",
+        "type": "datetime",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblcharge.proccode",
+      "kind": "Column",
+      "name": "ProcCode",
+      "parent": "db:dbo.tblcharge",
+      "file": "Database/schema.sql",
+      "line": 40,
+      "endLine": 40,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblCharge",
+        "type": "varchar(10)",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblcharge.visitid",
+      "kind": "Column",
+      "name": "VisitID",
+      "parent": "db:dbo.tblcharge",
+      "file": "Database/schema.sql",
+      "line": 39,
+      "endLine": 39,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblCharge",
+        "type": "int",
+        "nullable": "true",
+        "references": "tblVisit.VisitID"
+      }
+    },
+    {
+      "id": "db:dbo.tblclaim",
+      "kind": "Table",
+      "name": "tblClaim",
+      "parent": "file:Database/schema.sql",
+      "file": "Database/schema.sql",
+      "line": 48,
+      "endLine": 56,
+      "language": "T-SQL",
+      "props": {
+        "schema": "dbo",
+        "subkind": "table",
+        "lines": "9"
+      }
+    },
+    {
+      "id": "db:dbo.tblclaim.amt",
+      "kind": "Column",
+      "name": "Amt",
+      "parent": "db:dbo.tblclaim",
+      "file": "Database/schema.sql",
+      "line": 51,
+      "endLine": 51,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblClaim",
+        "type": "money",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblclaim.claimno",
+      "kind": "Column",
+      "name": "ClaimNo",
+      "parent": "db:dbo.tblclaim",
+      "file": "Database/schema.sql",
+      "line": 49,
+      "endLine": 49,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblClaim",
+        "type": "varchar(15)",
+        "nullable": "false",
+        "key": "primary"
+      }
+    },
+    {
+      "id": "db:dbo.tblclaim.enteredon",
+      "kind": "Column",
+      "name": "EnteredOn",
+      "parent": "db:dbo.tblclaim",
+      "file": "Database/schema.sql",
+      "line": 53,
+      "endLine": 53,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblClaim",
+        "type": "datetime",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblclaim.patid",
+      "kind": "Column",
+      "name": "PatID",
+      "parent": "db:dbo.tblclaim",
+      "file": "Database/schema.sql",
+      "line": 50,
+      "endLine": 50,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblClaim",
+        "type": "int",
+        "nullable": "false",
+        "references": "tblPatient.PatID"
+      }
+    },
+    {
+      "id": "db:dbo.tblclaim.status",
+      "kind": "Column",
+      "name": "Status",
+      "parent": "db:dbo.tblclaim",
+      "file": "Database/schema.sql",
+      "line": 52,
+      "endLine": 52,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblClaim",
+        "type": "varchar(8)",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient",
+      "kind": "Table",
+      "name": "tblPatient",
+      "parent": "file:Database/schema.sql",
+      "file": "Database/schema.sql",
+      "line": 11,
+      "endLine": 24,
+      "language": "T-SQL",
+      "props": {
+        "schema": "dbo",
+        "subkind": "table",
+        "lines": "14"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.active",
+      "kind": "Column",
+      "name": "Active",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 17,
+      "endLine": 17,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "char(1)",
+        "nullable": "false",
+        "default": "'Y'"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.deleted",
+      "kind": "Column",
+      "name": "Deleted",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 20,
+      "endLine": 20,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "bit",
+        "nullable": "false",
+        "default": "0"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.dob",
+      "kind": "Column",
+      "name": "DOB",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 14,
+      "endLine": 14,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "varchar(10)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.enteredby",
+      "kind": "Column",
+      "name": "EnteredBy",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 21,
+      "endLine": 21,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "varchar(20)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.fax",
+      "kind": "Column",
+      "name": "Fax",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 19,
+      "endLine": 19,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "varchar(20)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.patid",
+      "kind": "Column",
+      "name": "PatID",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 12,
+      "endLine": 12,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "int",
+        "nullable": "false",
+        "identity": "true",
+        "key": "primary"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.patname",
+      "kind": "Column",
+      "name": "PatName",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 13,
+      "endLine": 13,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "varchar(70)",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.payercode",
+      "kind": "Column",
+      "name": "PayerCode",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 16,
+      "endLine": 16,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "varchar(12)",
+        "nullable": "true",
+        "references": "tblPayer.PayerCode"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.phone",
+      "kind": "Column",
+      "name": "Phone",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 18,
+      "endLine": 18,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "varchar(20)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblpatient.sex",
+      "kind": "Column",
+      "name": "Sex",
+      "parent": "db:dbo.tblpatient",
+      "file": "Database/schema.sql",
+      "line": 15,
+      "endLine": 15,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPatient",
+        "type": "char(1)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblpayer",
+      "kind": "Table",
+      "name": "tblPayer",
+      "parent": "file:Database/schema.sql",
+      "file": "Database/schema.sql",
+      "line": 3,
+      "endLine": 9,
+      "language": "T-SQL",
+      "props": {
+        "schema": "dbo",
+        "subkind": "table",
+        "lines": "7"
+      }
+    },
+    {
+      "id": "db:dbo.tblpayer.copaypct",
+      "kind": "Column",
+      "name": "CopayPct",
+      "parent": "db:dbo.tblpayer",
+      "file": "Database/schema.sql",
+      "line": 6,
+      "endLine": 6,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPayer",
+        "type": "decimal(5,2)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblpayer.payercode",
+      "kind": "Column",
+      "name": "PayerCode",
+      "parent": "db:dbo.tblpayer",
+      "file": "Database/schema.sql",
+      "line": 4,
+      "endLine": 4,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPayer",
+        "type": "varchar(12)",
+        "nullable": "false",
+        "key": "primary"
+      }
+    },
+    {
+      "id": "db:dbo.tblpayer.payername",
+      "kind": "Column",
+      "name": "PayerName",
+      "parent": "db:dbo.tblpayer",
+      "file": "Database/schema.sql",
+      "line": 5,
+      "endLine": 5,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPayer",
+        "type": "varchar(60)",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblpayer.phone",
+      "kind": "Column",
+      "name": "Phone",
+      "parent": "db:dbo.tblpayer",
+      "file": "Database/schema.sql",
+      "line": 7,
+      "endLine": 7,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblPayer",
+        "type": "varchar(20)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblvisit",
+      "kind": "Table",
+      "name": "tblVisit",
+      "parent": "file:Database/schema.sql",
+      "file": "Database/schema.sql",
+      "line": 26,
+      "endLine": 34,
+      "language": "T-SQL",
+      "props": {
+        "schema": "dbo",
+        "subkind": "table",
+        "lines": "9"
+      }
+    },
+    {
+      "id": "db:dbo.tblvisit.clinician",
+      "kind": "Column",
+      "name": "Clinician",
+      "parent": "db:dbo.tblvisit",
+      "file": "Database/schema.sql",
+      "line": 30,
+      "endLine": 30,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblVisit",
+        "type": "varchar(60)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblvisit.patid",
+      "kind": "Column",
+      "name": "PatID",
+      "parent": "db:dbo.tblvisit",
+      "file": "Database/schema.sql",
+      "line": 28,
+      "endLine": 28,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblVisit",
+        "type": "int",
+        "nullable": "false",
+        "references": "tblPatient.PatID"
+      }
+    },
+    {
+      "id": "db:dbo.tblvisit.reason",
+      "kind": "Column",
+      "name": "Reason",
+      "parent": "db:dbo.tblvisit",
+      "file": "Database/schema.sql",
+      "line": 31,
+      "endLine": 31,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblVisit",
+        "type": "varchar(255)",
+        "nullable": "true"
+      }
+    },
+    {
+      "id": "db:dbo.tblvisit.visitdt",
+      "kind": "Column",
+      "name": "VisitDt",
+      "parent": "db:dbo.tblvisit",
+      "file": "Database/schema.sql",
+      "line": 29,
+      "endLine": 29,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblVisit",
+        "type": "datetime",
+        "nullable": "false"
+      }
+    },
+    {
+      "id": "db:dbo.tblvisit.visitid",
+      "kind": "Column",
+      "name": "VisitID",
+      "parent": "db:dbo.tblvisit",
+      "file": "Database/schema.sql",
+      "line": 27,
+      "endLine": 27,
+      "language": "T-SQL",
+      "props": {
+        "table": "tblVisit",
+        "type": "int",
+        "nullable": "false",
+        "identity": "true",
+        "key": "primary"
+      }
+    },
+    {
+      "id": "file:Billing.vb",
+      "kind": "File",
+      "name": "Billing.vb",
+      "parent": "project:ClinicOld.vbproj",
+      "file": "Billing.vb",
+      "line": 1,
+      "endLine": 58,
+      "language": "VB.NET",
+      "props": {
+        "lines": "58",
+        "code": "50",
+        "comments": "1",
+        "blank": "7"
+      }
+    },
+    {
+      "id": "file:Database/schema.sql",
+      "kind": "File",
+      "name": "schema.sql",
+      "parent": "project:ClinicOld.vbproj",
+      "file": "Database/schema.sql",
+      "line": 1,
+      "endLine": 64,
+      "language": "T-SQL",
+      "props": {
+        "lines": "64",
+        "code": "62",
+        "comments": "1",
+        "blank": "1"
+      }
+    },
+    {
+      "id": "file:PatientScreen.vb",
+      "kind": "File",
+      "name": "PatientScreen.vb",
+      "parent": "project:ClinicOld.vbproj",
+      "file": "PatientScreen.vb",
+      "line": 1,
+      "endLine": 45,
+      "language": "VB.NET",
+      "props": {
+        "lines": "45",
+        "code": "39",
+        "comments": "1",
+        "blank": "5"
+      }
+    },
+    {
+      "id": "project:ClinicOld.vbproj",
+      "kind": "Project",
+      "name": "ClinicOld",
+      "file": "ClinicOld.vbproj",
+      "line": 0,
+      "endLine": 0,
+      "language": "VB.NET",
+      "props": {
+        "key": "ClinicOld",
+        "rootNamespace": "ClinicOld",
+        "framework": "net48"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "db:dbo.tblpatient",
+      "to": "db:dbo.tblpayer",
+      "kind": "Uses",
+      "certainty": "Resolved",
+      "file": "Database/schema.sql",
+      "line": 23,
+      "note": "foreign key PayerCode \u2192 tblPayer(PayerCode)"
+    },
+    {
+      "from": "db:dbo.tblpatient.payercode",
+      "to": "db:dbo.tblpayer.payercode",
+      "kind": "Uses",
+      "certainty": "Resolved",
+      "file": "Database/schema.sql",
+      "line": 23,
+      "note": "foreign key"
+    },
+    {
+      "from": "db:dbo.tblvisit",
+      "to": "db:dbo.tblpatient",
+      "kind": "Uses",
+      "certainty": "Resolved",
+      "file": "Database/schema.sql",
+      "line": 33,
+      "note": "foreign key PatID \u2192 tblPatient(PatID)"
+    },
+    {
+      "from": "db:dbo.tblvisit.patid",
+      "to": "db:dbo.tblpatient.patid",
+      "kind": "Uses",
+      "certainty": "Resolved",
+      "file": "Database/schema.sql",
+      "line": 33,
+      "note": "foreign key"
+    },
+    {
+      "from": "db:dbo.tblcharge",
+      "to": "db:dbo.tblvisit",
+      "kind": "Uses",
+      "certainty": "Resolved",
+      "file": "Database/schema.sql",
+      "line": 45,
+      "note": "foreign key VisitID \u2192 tblVisit(VisitID)"
+    },
+    {
+      "from": "db:dbo.tblcharge.visitid",
+      "to": "db:dbo.tblvisit.visitid",
+      "kind": "Uses",
+      "certainty": "Resolved",
+      "file": "Database/schema.sql",
+      "line": 45,
+      "note": "foreign key"
+    },
+    {
+      "from": "db:dbo.tblclaim",
+      "to": "db:dbo.tblpatient",
+      "kind": "Uses",
+      "certainty": "Resolved",
+      "file": "Database/schema.sql",
+      "line": 55,
+      "note": "foreign key PatID \u2192 tblPatient(PatID)"
+    },
+    {
+      "from": "db:dbo.tblclaim.patid",
+      "to": "db:dbo.tblpatient.patid",
+      "kind": "Uses",
+      "certainty": "Resolved",
+      "file": "Database/schema.sql",
+      "line": 55,
+      "note": "foreign key"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "to": "ClinicOld:M:ClinicOld.Billing.CopayPercent(System.Int32)",
+      "kind": "Calls",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 15,
+      "note": "Dim copay As Decimal = amount * CopayPercent(patient) / 100D"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "to": "db:dbo.tblcharge",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 16,
+      "note": "INSERT: INSERT INTO dbo.tblCharge (PatID, VisitID, ProcCode, Amt, Copay, PostedOn) VALUES (@p, @v, @c, @a, @cp, GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "to": "db:dbo.tblcharge.patid",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 16,
+      "note": "INSERT: INSERT INTO dbo.tblCharge (PatID, VisitID, ProcCode, Amt, Copay, PostedOn) VALUES (@p, @v, @c, @a, @cp, GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "to": "db:dbo.tblcharge.visitid",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 16,
+      "note": "INSERT: INSERT INTO dbo.tblCharge (PatID, VisitID, ProcCode, Amt, Copay, PostedOn) VALUES (@p, @v, @c, @a, @cp, GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "to": "db:dbo.tblcharge.proccode",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 16,
+      "note": "INSERT: INSERT INTO dbo.tblCharge (PatID, VisitID, ProcCode, Amt, Copay, PostedOn) VALUES (@p, @v, @c, @a, @cp, GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "to": "db:dbo.tblcharge.amt",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 16,
+      "note": "INSERT: INSERT INTO dbo.tblCharge (PatID, VisitID, ProcCode, Amt, Copay, PostedOn) VALUES (@p, @v, @c, @a, @cp, GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "to": "db:dbo.tblcharge.copay",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 16,
+      "note": "INSERT: INSERT INTO dbo.tblCharge (PatID, VisitID, ProcCode, Amt, Copay, PostedOn) VALUES (@p, @v, @c, @a, @cp, GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "to": "db:dbo.tblcharge.postedon",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 16,
+      "note": "INSERT: INSERT INTO dbo.tblCharge (PatID, VisitID, ProcCode, Amt, Copay, PostedOn) VALUES (@p, @v, @c, @a, @cp, GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.CopayPercent(System.Int32)",
+      "to": "db:dbo.tblpatient",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 26,
+      "note": "SELECT ISNULL(y.CopayPct, 0) FROM dbo.tblPatient p JOIN dbo.tblPayer y ON y.PayerCode = p.PayerCode WHERE p.PatID = @p"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.CopayPercent(System.Int32)",
+      "to": "db:dbo.tblpayer",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 26,
+      "note": "SELECT ISNULL(y.CopayPct, 0) FROM dbo.tblPatient p JOIN dbo.tblPayer y ON y.PayerCode = p.PayerCode WHERE p.PatID = @p"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.CopayPercent(System.Int32)",
+      "to": "db:dbo.tblpayer.copaypct",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 26,
+      "note": "SELECT ISNULL(y.CopayPct, 0) FROM dbo.tblPatient p JOIN dbo.tblPayer y ON y.PayerCode = p.PayerCode WHERE p.PatID = @p"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.CopayPercent(System.Int32)",
+      "to": "db:dbo.tblpayer.payercode",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 26,
+      "note": "SELECT ISNULL(y.CopayPct, 0) FROM dbo.tblPatient p JOIN dbo.tblPayer y ON y.PayerCode = p.PayerCode WHERE p.PatID = @p"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.CopayPercent(System.Int32)",
+      "to": "db:dbo.tblpatient.payercode",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 26,
+      "note": "SELECT ISNULL(y.CopayPct, 0) FROM dbo.tblPatient p JOIN dbo.tblPayer y ON y.PayerCode = p.PayerCode WHERE p.PatID = @p"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.CopayPercent(System.Int32)",
+      "to": "db:dbo.tblpatient.patid",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 26,
+      "note": "SELECT ISNULL(y.CopayPct, 0) FROM dbo.tblPatient p JOIN dbo.tblPayer y ON y.PayerCode = p.PayerCode WHERE p.PatID = @p"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.EnterClaim(System.String,System.Int32,System.Decimal)",
+      "to": "db:dbo.tblclaim",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 32,
+      "note": "INSERT: INSERT INTO dbo.tblClaim (ClaimNo, PatID, Amt, Status, EnteredOn) VALUES (@n, @p, @a, 'OPEN', GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.EnterClaim(System.String,System.Int32,System.Decimal)",
+      "to": "db:dbo.tblclaim.claimno",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 32,
+      "note": "INSERT: INSERT INTO dbo.tblClaim (ClaimNo, PatID, Amt, Status, EnteredOn) VALUES (@n, @p, @a, 'OPEN', GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.EnterClaim(System.String,System.Int32,System.Decimal)",
+      "to": "db:dbo.tblclaim.patid",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 32,
+      "note": "INSERT: INSERT INTO dbo.tblClaim (ClaimNo, PatID, Amt, Status, EnteredOn) VALUES (@n, @p, @a, 'OPEN', GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.EnterClaim(System.String,System.Int32,System.Decimal)",
+      "to": "db:dbo.tblclaim.amt",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 32,
+      "note": "INSERT: INSERT INTO dbo.tblClaim (ClaimNo, PatID, Amt, Status, EnteredOn) VALUES (@n, @p, @a, 'OPEN', GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.EnterClaim(System.String,System.Int32,System.Decimal)",
+      "to": "db:dbo.tblclaim.status",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 32,
+      "note": "INSERT: INSERT INTO dbo.tblClaim (ClaimNo, PatID, Amt, Status, EnteredOn) VALUES (@n, @p, @a, 'OPEN', GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.EnterClaim(System.String,System.Int32,System.Decimal)",
+      "to": "db:dbo.tblclaim.enteredon",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 32,
+      "note": "INSERT: INSERT INTO dbo.tblClaim (ClaimNo, PatID, Amt, Status, EnteredOn) VALUES (@n, @p, @a, 'OPEN', GETDATE())"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.SetClaimStatus(System.String,System.String)",
+      "to": "db:dbo.tblclaim",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 45,
+      "note": "UPDATE: UPDATE dbo.tblClaim SET Status = @s WHERE ClaimNo = @n"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.SetClaimStatus(System.String,System.String)",
+      "to": "db:dbo.tblclaim.status",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 45,
+      "note": "UPDATE: UPDATE dbo.tblClaim SET Status = @s WHERE ClaimNo = @n"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.SetClaimStatus(System.String,System.String)",
+      "to": "db:dbo.tblclaim.claimno",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 45,
+      "note": "UPDATE dbo.tblClaim SET Status = @s WHERE ClaimNo = @n"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.RecordVisit(System.Int32,System.String,System.String)",
+      "to": "db:dbo.tblvisit",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 52,
+      "note": "INSERT: INSERT INTO dbo.tblVisit (PatID, VisitDt, Clinician, Reason) VALUES (@p, GETDATE(), @c, @r)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.RecordVisit(System.Int32,System.String,System.String)",
+      "to": "db:dbo.tblvisit.patid",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 52,
+      "note": "INSERT: INSERT INTO dbo.tblVisit (PatID, VisitDt, Clinician, Reason) VALUES (@p, GETDATE(), @c, @r)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.RecordVisit(System.Int32,System.String,System.String)",
+      "to": "db:dbo.tblvisit.visitdt",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 52,
+      "note": "INSERT: INSERT INTO dbo.tblVisit (PatID, VisitDt, Clinician, Reason) VALUES (@p, GETDATE(), @c, @r)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.RecordVisit(System.Int32,System.String,System.String)",
+      "to": "db:dbo.tblvisit.clinician",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 52,
+      "note": "INSERT: INSERT INTO dbo.tblVisit (PatID, VisitDt, Clinician, Reason) VALUES (@p, GETDATE(), @c, @r)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.Billing.RecordVisit(System.Int32,System.String,System.String)",
+      "to": "db:dbo.tblvisit.reason",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "Billing.vb",
+      "line": 52,
+      "note": "INSERT: INSERT INTO dbo.tblVisit (PatID, VisitDt, Clinician, Reason) VALUES (@p, GETDATE(), @c, @r)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "to": "db:dbo.tblpatient",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 21,
+      "note": "INSERT: INSERT INTO dbo.tblPatient (PatName, DOB, Sex, PayerCode, Active, Phone, EnteredBy) VALUES (@n, @d, @s, @p, @a, @ph, @u)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "to": "db:dbo.tblpatient.patname",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 21,
+      "note": "INSERT: INSERT INTO dbo.tblPatient (PatName, DOB, Sex, PayerCode, Active, Phone, EnteredBy) VALUES (@n, @d, @s, @p, @a, @ph, @u)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "to": "db:dbo.tblpatient.dob",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 21,
+      "note": "INSERT: INSERT INTO dbo.tblPatient (PatName, DOB, Sex, PayerCode, Active, Phone, EnteredBy) VALUES (@n, @d, @s, @p, @a, @ph, @u)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "to": "db:dbo.tblpatient.sex",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 21,
+      "note": "INSERT: INSERT INTO dbo.tblPatient (PatName, DOB, Sex, PayerCode, Active, Phone, EnteredBy) VALUES (@n, @d, @s, @p, @a, @ph, @u)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "to": "db:dbo.tblpatient.payercode",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 21,
+      "note": "INSERT: INSERT INTO dbo.tblPatient (PatName, DOB, Sex, PayerCode, Active, Phone, EnteredBy) VALUES (@n, @d, @s, @p, @a, @ph, @u)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "to": "db:dbo.tblpatient.active",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 21,
+      "note": "INSERT: INSERT INTO dbo.tblPatient (PatName, DOB, Sex, PayerCode, Active, Phone, EnteredBy) VALUES (@n, @d, @s, @p, @a, @ph, @u)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "to": "db:dbo.tblpatient.phone",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 21,
+      "note": "INSERT: INSERT INTO dbo.tblPatient (PatName, DOB, Sex, PayerCode, Active, Phone, EnteredBy) VALUES (@n, @d, @s, @p, @a, @ph, @u)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "to": "db:dbo.tblpatient.enteredby",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 21,
+      "note": "INSERT: INSERT INTO dbo.tblPatient (PatName, DOB, Sex, PayerCode, Active, Phone, EnteredBy) VALUES (@n, @d, @s, @p, @a, @ph, @u)"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.DeletePatient(System.Int32)",
+      "to": "db:dbo.tblpatient",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 33,
+      "note": "UPDATE: UPDATE dbo.tblPatient SET Deleted = 1 WHERE PatID = @id"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.DeletePatient(System.Int32)",
+      "to": "db:dbo.tblpatient.deleted",
+      "kind": "Writes",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 33,
+      "note": "UPDATE: UPDATE dbo.tblPatient SET Deleted = 1 WHERE PatID = @id"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.DeletePatient(System.Int32)",
+      "to": "db:dbo.tblpatient.patid",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 33,
+      "note": "UPDATE dbo.tblPatient SET Deleted = 1 WHERE PatID = @id"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "to": "db:dbo.tblpatient",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 39,
+      "note": "SELECT PatID, PatName, DOB, Sex, PayerCode, Phone FROM dbo.tblPatient WHERE Deleted = 0 AND PatName LIKE @t"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "to": "db:dbo.tblpatient.patid",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 39,
+      "note": "SELECT PatID, PatName, DOB, Sex, PayerCode, Phone FROM dbo.tblPatient WHERE Deleted = 0 AND PatName LIKE @t"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "to": "db:dbo.tblpatient.patname",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 39,
+      "note": "SELECT PatID, PatName, DOB, Sex, PayerCode, Phone FROM dbo.tblPatient WHERE Deleted = 0 AND PatName LIKE @t"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "to": "db:dbo.tblpatient.dob",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 39,
+      "note": "SELECT PatID, PatName, DOB, Sex, PayerCode, Phone FROM dbo.tblPatient WHERE Deleted = 0 AND PatName LIKE @t"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "to": "db:dbo.tblpatient.sex",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 39,
+      "note": "SELECT PatID, PatName, DOB, Sex, PayerCode, Phone FROM dbo.tblPatient WHERE Deleted = 0 AND PatName LIKE @t"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "to": "db:dbo.tblpatient.payercode",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 39,
+      "note": "SELECT PatID, PatName, DOB, Sex, PayerCode, Phone FROM dbo.tblPatient WHERE Deleted = 0 AND PatName LIKE @t"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "to": "db:dbo.tblpatient.phone",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 39,
+      "note": "SELECT PatID, PatName, DOB, Sex, PayerCode, Phone FROM dbo.tblPatient WHERE Deleted = 0 AND PatName LIKE @t"
+    },
+    {
+      "from": "ClinicOld:M:ClinicOld.PatientScreen.FindPatients(System.String)",
+      "to": "db:dbo.tblpatient.deleted",
+      "kind": "Reads",
+      "certainty": "Resolved",
+      "file": "PatientScreen.vb",
+      "line": 39,
+      "note": "SELECT PatID, PatName, DOB, Sex, PayerCode, Phone FROM dbo.tblPatient WHERE Deleted = 0 AND PatName LIKE @t"
+    }
+  ],
+  "notes": [],
+  "findings": [
+    {
+      "kind": "Rule",
+      "category": "validation",
+      "nodeId": "ClinicOld:M:ClinicOld.Billing.PostCharge(System.Int32,System.Int32,System.String,System.Decimal)",
+      "title": "A charge can't be zero.",
+      "detail": "When amount = 0, it stops.",
+      "code": "If amount = 0 Then",
+      "file": "Billing.vb",
+      "line": 12,
+      "severity": "Info",
+      "confidence": "High"
+    },
+    {
+      "kind": "Rule",
+      "category": "decision",
+      "nodeId": "ClinicOld:M:ClinicOld.Billing.SetClaimStatus(System.String,System.String)",
+      "title": "SetClaimStatus decides by status: \"OPEN\" or \"SENT\" or \"PAID\" or \"DENIED\" or \"VOID\", anything else",
+      "detail": "\"OPEN\" or \"SENT\" or \"PAID\" or \"DENIED\" or \"VOID\" \u2192 nothing; anything else \u2192 Throw New ArgumentException(\"Unknown claim status.\")",
+      "code": "Select Case status",
+      "file": "Billing.vb",
+      "line": 40,
+      "severity": "Info",
+      "confidence": "Medium"
+    },
+    {
+      "kind": "Rule",
+      "category": "validation",
+      "nodeId": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "title": "Enter the name as LAST, FIRST.",
+      "detail": "When name.IndexOf(\",\"c) < 0, it stops.",
+      "code": "If name.IndexOf(\",\"c) < 0 Then",
+      "file": "PatientScreen.vb",
+      "line": 12,
+      "severity": "Info",
+      "confidence": "High"
+    },
+    {
+      "kind": "Rule",
+      "category": "validation",
+      "nodeId": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "title": "Birth date must be MM/DD/YYYY.",
+      "detail": "When Not IsDate(birth), it stops.",
+      "code": "If Not IsDate(birth) Then",
+      "file": "PatientScreen.vb",
+      "line": 15,
+      "severity": "Info",
+      "confidence": "High"
+    },
+    {
+      "kind": "Rule",
+      "category": "validation",
+      "nodeId": "ClinicOld:M:ClinicOld.PatientScreen.SavePatient(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)",
+      "title": "Sex is M, F or U.",
+      "detail": "When sex <> \"M\" AndAlso sex <> \"F\" AndAlso sex <> \"U\", it stops.",
+      "code": "If sex <> \"M\" AndAlso sex <> \"F\" AndAlso sex <> \"U\" Then",
+      "file": "PatientScreen.vb",
+      "line": 18,
+      "severity": "Info",
+      "confidence": "High"
+    },
+    {
+      "kind": "DeadCode",
+      "category": "unused",
+      "nodeId": "db:dbo.faxqueue",
+      "title": "FaxQueue: no code reads or writes this table",
+      "detail": "No code or SQL in the scan touches it.",
+      "file": "Database/schema.sql",
+      "line": 58,
+      "severity": "Low",
+      "confidence": "Medium"
+    }
+  ],
+  "marks": {}
+}
