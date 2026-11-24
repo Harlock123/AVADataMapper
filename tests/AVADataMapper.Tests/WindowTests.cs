@@ -184,3 +184,63 @@ public sealed class ChecksWindowTests
         finally { w.Close(); }
     });
 }
+
+public sealed class RunWindowTests
+{
+    [Fact]
+    public void A_suggested_mapping_takes_the_profiles_formats_and_codes_then_dry_runs() => HeadlessApp.Run(() =>
+    {
+        var root = Samples.Copy();
+        var w = new MainWindow();
+        w.Show();
+        try
+        {
+            w.OpenSchema(true, Path.Combine(root, "old", "clinic-old.db"));
+            w.OpenSchema(false, Path.Combine(root, "new", "clinic-new.db"));
+            w.OpenEvidence(Path.Combine(root, "old", "clinic-old.lens"));
+            w.Suggest();
+            Assert.Contains(w.Findings, f => f.Rule.Id == "M15" && f.About == "sex_codes");
+            Assert.Null(w.RunDryRun());
+            Assert.StartsWith("The mapping has", w.txtStatusBar.Text);
+
+            var p = w.ProfileOld("tblPatient")!;
+            Assert.Equal(40, p.Rows);
+            var text = string.Join("\n", w.ProfilePanel.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text));
+            Assert.Contains("→ patient.birth_date: dates in MM/dd/yyyy, yyyy-MM-dd, yyyyMMdd, M/d/yyyy; patient.birth_date reads MM/dd/yyyy; not dates in any of them: 13/45/1980", text);
+            Assert.Contains("→ patient.sex_code: 1 null; patient.sex_code is required; X isn't in the lookup", text);
+            w.UseFormats("patient", "birth_date");
+            Assert.Equal(["MM/dd/yyyy", "yyyy-MM-dd", "yyyyMMdd", "M/d/yyyy"], w.Map.Table("patient")!.Column("birth_date")!.Formats);
+            w.UseCodes("patient", "sex_code");
+            Assert.Equal(["F", "M", "X"], w.Map.Table("sex_codes")!.Rows!.Select(r => (string?)r["code"]));
+            w.ProfileOld("tblClaim");
+            w.UseCodes("claim", "status");
+            Assert.Equal(6, w.Map.Table("claim_status")!.Rows!.Count);
+            // The old code allows U, the data has X: a person decides X and nulls are U, and adds U to the codes.
+            Assert.Contains(w.Findings, f => f.Rule.Id == "M11" && f.Message == "It gives U, which sex_codes doesn't have.");
+            w.Change("decided about sex codes", () =>
+            {
+                var rows = w.Map.Table("sex_codes")!.Rows!;
+                rows.RemoveAll(r => (string?)r["code"] == "X");
+                rows.Add(new() { ["code"] = "U", ["meaning"] = "Unknown" });
+                var sex = w.Map.Table("patient")!.Column("sex_code")!;
+                sex.Map!["X"] = "U";
+                sex.IfNull = "U";
+            });
+            Assert.DoesNotContain(w.Findings, f => f.Rule.Id == "M11");
+            // The suggestion left one required column; a constant fills it, then the dry run runs.
+            w.SetColumn("claim", "source_system", ColumnKind.Constant);
+            w.Map.Table("claim")!.Column("source_system")!.Value = "CLINIC2006";
+            var runs = w.RunDryRun() ?? throw new Xunit.Sdk.XunitException(w.txtStatusBar.Text + " " + string.Join(" | ", w.Findings.Where(f => f.Severity == Core.Mapping.Severity.Error)));
+            // Without the filter and a value for a null EnteredBy, the dry run finds what's left to decide.
+            var patients = runs.Single(r => r.Target == "patient");
+            Assert.Equal((40L, 0L, 28L), (patients.Read, patients.Filtered, patients.Inserted));
+            Assert.Contains(("created_by is required, and the value is null", 9), patients.Groups);
+            Assert.Equal(10, patients.Rejects.Count(x => x.Reasons.Contains("created_by is required, and the value is null")));
+            Assert.StartsWith("Dry run: ", w.txtStatusBar.Text);
+            Assert.EndsWith("Nothing was written.", w.txtStatusBar.Text);
+            var shown = string.Join("\n", w.DryRunPanel.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text));
+            Assert.Contains("PATIENT · 12 REJECTED", shown);
+        }
+        finally { w.Close(); }
+    });
+}

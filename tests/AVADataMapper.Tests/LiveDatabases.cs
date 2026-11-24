@@ -97,3 +97,24 @@ public sealed class LiveCatalogTests
     private static List<string> Norm(DatabaseSchema s) =>
         [.. SchemaTests.Shape(s).Select(l => System.Text.RegularExpressions.Regex.Replace(l.Replace("(", "").Replace(")", ""), @"::\w+", "")).Order(StringComparer.Ordinal)];
 }
+
+/// <summary>Dry runs reading the old rows from a real SQL Server (opt-in): the same as from the SQLite copy.</summary>
+public sealed class LiveDryRunTests
+{
+    [Fact]
+    public void A_dry_run_reading_SQL_Server_makes_the_same_rows_as_one_reading_SQLite()
+    {
+        if (LiveDatabase.Server(Dialect.SqlServer) == null) return;
+        using var db = new LiveDatabase(Dialect.SqlServer);
+        db.Run(File.ReadAllText(Samples.Path("old/clinic-old.tsql.sql")));
+        db.Run(File.ReadAllText(Samples.Path("old/clinic-old.data.sql")));
+        var old = db.Schema();
+        using var c = Catalogs.Open(Dialect.SqlServer, db.Connection);
+        var runs = Core.Data.DryRun.Run(Samples.Map, old, Samples.New, c, Dialect.SqlServer);
+        var lite = DryRunTests.RunSample();
+        Assert.Equal(DryRunTests.Summary(lite), DryRunTests.Summary(runs));
+        Assert.Equal(DryRunTests.Own(lite), DryRunTests.Own(runs));
+        var p = Core.Data.Profiler.Profile(c, Dialect.SqlServer, old.Table("tblPatient")!);
+        Assert.Equal(["MM/dd/yyyy", "yyyy-MM-dd", "yyyyMMdd", "M/d/yyyy"], p.Column("DOB")!.DateFormats);
+    }
+}

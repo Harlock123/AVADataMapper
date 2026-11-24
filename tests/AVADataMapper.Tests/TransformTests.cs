@@ -54,7 +54,7 @@ public sealed class TransformTests
         var ctx = new TransformContext();
         ctx.Keys["patient"] = new() { ["3"] = 103 };
         Assert.Equal("103", Run(charge.Column("patient_id")!, 3L, nc.Column("patient_id")!, ctx));
-        Assert.Equal("rejected: PatID 977 has no patient row (the old row it points at isn't migrated)", Run(charge.Column("patient_id")!, 977L, nc.Column("patient_id")!, ctx));
+        Assert.Equal("rejected: PatID 977 has no patient row (the old row it points at isn't there)", Run(charge.Column("patient_id")!, 977L, nc.Column("patient_id")!, ctx));
     }
 
     [Fact]

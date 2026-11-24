@@ -90,7 +90,11 @@ public sealed partial class MainWindow
         ShowCoverage();
         ShowEvidence();
         AfterChange();
+        Ran();
     }
+
+    /// <summary>After every change: the profile and dry run tabs keep up with the schemas.</summary>
+    partial void Ran();
 
     /// <summary>After every change: later parts refresh what they show.</summary>
     partial void AfterChange();

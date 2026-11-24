@@ -35,6 +35,12 @@ public sealed class Screenshots
             Save(w, Path.Combine(dir, "mapping.png"));
             w.Tabs.SelectedIndex = 2;
             Save(w, Path.Combine(dir, "checks.png"));
+            w.ProfileOld("tblPatient");
+            w.Tabs.SelectedIndex = 3;
+            Save(w, Path.Combine(dir, "profile.png"));
+            w.RunDryRun();
+            w.Tabs.SelectedIndex = 4;
+            Save(w, Path.Combine(dir, "dry-run.png"));
             w.Tabs.SelectedIndex = 0;
             w.ShowTable("charge", "procedure_code");
             w.TryBox.Text = "99213-25";

@@ -69,7 +69,7 @@ public sealed class Expression
 
     // ───────────────────────────── values ─────────────────────────────
 
-    internal static decimal? Number(object? v) => v switch
+    public static decimal? Number(object? v) => v switch
     {
         null => null,
         decimal d => d,
@@ -84,7 +84,7 @@ public sealed class Expression
         _ => null,
     };
 
-    internal static string? Str(object? v) => v switch
+    public static string? Str(object? v) => v switch
     {
         null => null,
         string s => s,

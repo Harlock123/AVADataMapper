@@ -21,6 +21,9 @@ public sealed class TransformContext
     /// <summary>New code table → its codes (when its rows are given).</summary>
     public Dictionary<string, HashSet<string>> Codes { get; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>New table → old key → why its row isn't in the new table (filtered out, or rejected and why).</summary>
+    public Dictionary<string, Dictionary<string, string>> Gone { get; } = new(StringComparer.OrdinalIgnoreCase);
+
     public static string KeyText(object? v) => Expression.Str(v)?.Trim() ?? "";
 }
 
@@ -159,8 +162,11 @@ public static partial class Transforms
                 var v = From();
                 if (v == null || v is string bs && bs.Trim().Length == 0) return new Outcome(null);
                 if (cm.Table == null || !context.Keys.TryGetValue(cm.Table, out var keys)) return Outcome.Reject($"{cm.Table ?? "?"} has no key map (its rows aren't loaded first)");
-                return keys.TryGetValue(TransformContext.KeyText(v), out var key) ? new Outcome(key)
-                    : Unknown($"{cm.From} {TransformContext.KeyText(v)} has no {cm.Table} row (the old row it points at isn't migrated)");
+                var kt = TransformContext.KeyText(v);
+                if (keys.TryGetValue(kt, out var key)) return new Outcome(key);
+                return Unknown(context.Gone.TryGetValue(cm.Table, out var gone) && gone.TryGetValue(kt, out var why)
+                    ? $"{cm.From} {kt}: its {cm.Table} row isn't migrated ({why})"
+                    : $"{cm.From} {kt} has no {cm.Table} row (the old row it points at isn't there)");
             }
             case ColumnKind.Split:
             {

@@ -240,7 +240,7 @@ def rows():
             vid += 1
             when = f"2026-{1 + (p + k) % 10:02d}-{1 + (p * 7 + k) % 27:02d} {8 + (p + k) % 9:02d}:{(p * 13) % 60:02d}:00"
             reason = REASONS[(p + k) % len(REASONS)]
-            if vid == 17:
+            if vid == 20:   # patient 10's visit: a patient who migrates, so this shows on its own
                 reason = ("Patient reports intermittent dizziness on standing, worse in the mornings, with occasional "
                           "blurred vision and a history of falls; family asks about medication interactions and whether "
                           "the new prescription from the cardiology referral should be continued.")   # over 200
@@ -254,8 +254,8 @@ def rows():
             amt = [125.00, 175.00, 25.00, 50.00, 180.00, 210.00][(vid_ + k) % 6]
             copay = round(amt * 0.2, 2) if (vid_ + k) % 4 else None
             if cid == 21: proc = "99213-25"           # a modifier pushed into the code: over 5 characters
-            if cid == 22: amt = 0.00                  # breaks the new check (amount > 0)
-            if cid == 23: amt = -25.00                # a reversal: breaks it too
+            if cid == 28: amt = 0.00                  # breaks the new check (amount > 0)
+            if cid == 29: amt = -25.00                # a reversal: breaks it too
             charges.append((cid, pat, vid_, proc, amt, copay, when))
     # Charges for patients purged long ago (no foreign key let them stay), and one with no visit.
     charges.append((cid + 1, 977, None, "99213", 125.00, 25.00, "2026-02-03 10:00:00"))
@@ -266,7 +266,7 @@ def rows():
         if p % 2 == 0:
             continue
         st = statuses[n % 5]
-        if p == 9: st = "PEND"                  # a status the new table doesn't have
+        if p == 7: st = "PEND"                  # a status the new table doesn't have
         if p == 13: st = "paid"                 # lower case
         claims.append((f"CLM{2026000 + n:07d}", p, 125.00 + n, st, f"2026-{1 + n % 10:02d}-15 12:00:00"))
     faxes = [(1, "5555550210", None), (2, "5555550220", None)]
