@@ -180,6 +180,9 @@ public sealed class MapFile
 
     [JsonPropertyName("format")] public string Format { get; set; } = FormatName;
     [JsonPropertyName("version")] public int Version { get; set; } = 1;
+
+    /// <summary>The mapping's own id: a migration's journal keeps its rows under it, so a rerun of the same mapping picks up where it left off.</summary>
+    [JsonPropertyName("id")] public string Id { get; set; } = Guid.NewGuid().ToString("N");
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("source")] public Side Source { get; set; } = new() { Name = "old" };
     [JsonPropertyName("target")] public Side Target { get; set; } = new() { Name = "new" };

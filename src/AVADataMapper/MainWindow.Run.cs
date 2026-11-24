@@ -255,7 +255,6 @@ public sealed partial class MainWindow
         ];
     }
 
-    partial void Ran() => ProfileTable.ItemsSource = Old?.Tables.Select(t => t.Name).ToList();
 
     private partial IEnumerable<object> LaterMappingItems(Func<string, Action, Key?, KeyModifiers, MenuItem> item) =>
     [

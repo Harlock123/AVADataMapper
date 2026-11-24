@@ -14,6 +14,10 @@ public sealed class TableRun
     public string? From { get; init; }
     public long Read { get; set; }
     public long Filtered { get; set; }
+
+    /// <summary>Rows a previous run of the same mapping already put in (a rerun picks up where it left off).</summary>
+    public long Skipped { get; set; }
+
     public long Inserted { get; set; }
     public List<Reject> Rejects { get; } = [];
     public long Rejected { get; set; }
@@ -40,8 +44,11 @@ public interface IRowSink
     /// <summary>Called once before a table's rows.</summary>
     void Begin(Table table);
 
+    /// <summary>The new key of the row an earlier run made from this old row, or null when there's none.</summary>
+    object? Existing(Table table, string oldKey);
+
     /// <summary>Puts a row in (or pretends to); returns its key: the identity the database gave it, or its primary key's value.</summary>
-    object? Insert(Table table, IReadOnlyDictionary<string, object?> values);
+    object? Insert(Table table, string oldKey, IReadOnlyDictionary<string, object?> values);
 
     void End(Table table);
 }
@@ -53,7 +60,9 @@ public sealed class CountingSink : IRowSink
 
     public void Begin(Table table) => _next[table.Name] = 0;
 
-    public object? Insert(Table table, IReadOnlyDictionary<string, object?> values)
+    public object? Existing(Table table, string oldKey) => null;
+
+    public object? Insert(Table table, string oldKey, IReadOnlyDictionary<string, object?> values)
     {
         var id = table.Columns.FirstOrDefault(c => c.Identity);
         if (id != null) return (int)++_next[table.Name];
@@ -114,6 +123,8 @@ public static class Engine
                 foreach (var (given, i) in (tm.Rows ?? []).Select((r, i) => (r, i)))
                 {
                     run.Read++;
+                    var givenKey = nt.PrimaryKey.Count == 1 && given.TryGetValue(nt.PrimaryKey[0], out var gk) ? Expression.Str(Transforms.Clr(gk)) ?? $"row {i + 1}" : $"row {i + 1}";
+                    if (Skip(run, nt, givenKey, ctx, seen, sink, neu)) { codes.Add(givenKey); continue; }
                     var values = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
                     var reasons = new List<string>();
                     foreach (var c in nt.Columns.Where(c => !c.Identity))
@@ -122,7 +133,7 @@ public static class Engine
                         if (o.Rejected != null) reasons.Add(o.Rejected);
                         else if (!o.UseDefault) values[c.Name] = o.Value;
                     }
-                    Finish(run, nt, $"row {i + 1}", values, reasons, null, ctx, seen, checks, sink, options, neu);
+                    Finish(run, nt, givenKey, values, reasons, null, ctx, seen, checks, sink, options, neu);
                     if (reasons.Count == 0 && nt.PrimaryKey.Count == 1 && values.TryGetValue(nt.PrimaryKey[0], out var code)) codes.Add(Expression.Str(code)!);
                 }
                 ctx.Codes[nt.Name] = codes;
@@ -142,6 +153,7 @@ public static class Engine
                         ctx.Gone[nt.Name][oldKey] = $"filtered out by \"{tm.Where}\"";
                         continue;
                     }
+                    if (Skip(run, nt, oldKey, ctx, seen, sink, neu)) continue;
                     var values = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
                     var reasons = new List<string>();
                     foreach (var c in nt.Columns)
@@ -204,7 +216,7 @@ public static class Engine
         object? newKey;
         try
         {
-            newKey = sink.Insert(nt, values);
+            newKey = sink.Insert(nt, oldKey, values);
         }
         catch (DbException e)
         {
@@ -226,6 +238,21 @@ public static class Engine
             if (!seen.TryGetValue(slot, out var set)) seen[slot] = set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             set.Add(Text(vals));
         }
+    }
+
+    /// <summary>A row an earlier run already put in: its key goes into the key map (and the keys seen), and it's skipped.</summary>
+    private static bool Skip(TableRun run, Table nt, string oldKey, TransformContext ctx, Dictionary<string, HashSet<string>> seen, IRowSink sink, DatabaseSchema neu)
+    {
+        if (sink.Existing(nt, oldKey) is not { } key) return false;
+        run.Skipped++;
+        ctx.Keys[nt.Name][oldKey] = key;
+        if (nt.PrimaryKey.Count == 1)
+        {
+            var slot = Slot(nt.Name, nt.PrimaryKey);
+            if (!seen.TryGetValue(slot, out var set)) seen[slot] = set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            set.Add(Text([key]));
+        }
+        return true;
     }
 
     private const string Marker = " row isn't migrated (";

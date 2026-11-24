@@ -50,6 +50,24 @@ public sealed class Screenshots
     });
 
     [Fact]
+    public void Migrated() => HeadlessApp.Run(() =>
+    {
+        if (Environment.GetEnvironmentVariable("MAPPER_SHOTS") is not { Length: > 0 } dir) return;
+        Directory.CreateDirectory(dir);
+        var root = Samples.Copy();
+        var w = new MainWindow(Path.Combine(root, "clinic.dmap")) { Width = 1500, Height = 900 };
+        w.Show();
+        try
+        {
+            w.Migrate();
+            w.Migrate();
+            w.Tabs.SelectedIndex = 5;
+            Save(w, Path.Combine(dir, "migrate.png"));
+        }
+        finally { w.Close(); }
+    });
+
+    [Fact]
     public void Suggested() => HeadlessApp.Run(() =>
     {
         if (Environment.GetEnvironmentVariable("MAPPER_SHOTS") is not { Length: > 0 } dir) return;

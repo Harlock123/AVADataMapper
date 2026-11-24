@@ -7,8 +7,6 @@ namespace AVADataMapper;
 public sealed partial class MainWindow
 {
     private partial IEnumerable<object> LaterMenus(Func<string, Action, Key?, KeyModifiers, MenuItem> item) => [];
-    private partial IEnumerable<TabItem> EvenLaterTabs() => [];
-    private partial IEnumerable<object> EvenLaterMappingItems(Func<string, Action, Key?, KeyModifiers, MenuItem> item) => [];
-    private partial IEnumerable<object> EvenLaterViewItems(Func<string, Action, Key?, KeyModifiers, MenuItem> item) => [];
+    private partial IEnumerable<TabItem> AgentTabs() => [];
     private partial IEnumerable<object> LaterFileItems(Func<string, Action, Key?, KeyModifiers, MenuItem> item) => [];
 }

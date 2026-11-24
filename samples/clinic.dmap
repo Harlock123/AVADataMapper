@@ -1,6 +1,7 @@
 {
   "format": "avadatamapper.map",
   "version": 1,
+  "id": "c11a1c0000000000000000000000d1a9",
   "name": "Clinic: legacy to rebuild",
   "source": {
     "name": "old",

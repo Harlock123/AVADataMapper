@@ -118,3 +118,33 @@ public sealed class LiveDryRunTests
         Assert.Equal(["MM/dd/yyyy", "yyyy-MM-dd", "yyyyMMdd", "M/d/yyyy"], p.Column("DOB")!.DateFormats);
     }
 }
+
+/// <summary>A migration from a real SQL Server into a real PostgreSQL (opt-in): the same rows as the dry run says, and rollback.</summary>
+public sealed class LiveMigrationTests
+{
+    [Fact]
+    public void A_migration_from_SQL_Server_into_PostgreSQL_puts_in_what_the_dry_run_said()
+    {
+        if (LiveDatabase.Server(Dialect.SqlServer) == null || LiveDatabase.Server(Dialect.PostgreSql) == null) return;
+        using var src = new LiveDatabase(Dialect.SqlServer);
+        src.Run(File.ReadAllText(Samples.Path("old/clinic-old.tsql.sql")));
+        src.Run(File.ReadAllText(Samples.Path("old/clinic-old.data.sql")));
+        using var dst = new LiveDatabase(Dialect.PostgreSql);
+        dst.Run(File.ReadAllText(Samples.Path("new/clinic-new.pg.sql")));
+        var old = src.Schema();
+        var neu = dst.Schema();
+        using var oc = Catalogs.Open(Dialect.SqlServer, src.Connection);
+        using var nc = Catalogs.Open(Dialect.PostgreSql, dst.Connection);
+        var result = Core.Data.Migrator.Run(Samples.Map, old, neu, oc, Dialect.SqlServer, nc, Dialect.PostgreSql);
+        // PostgreSQL's catalog lists tables by name, so tables with no foreign keys between them load in another order.
+        Assert.Equal(DryRunTests.Summary(DryRunTests.RunSample()).Order(), DryRunTests.Summary(result.Tables).Order());
+        Assert.Equal(35L, MigrateTests.Count(nc, "patient"));
+        Assert.Equal(new DateOnly(1953, 6, 4), MigrateTests.Scalar(nc, "SELECT birth_date FROM patient WHERE family_name = 'HOLLOWAY'"));
+        Assert.Equal(true, MigrateTests.Scalar(nc, "SELECT is_active FROM patient WHERE family_name = 'HOLLOWAY'"));
+        Assert.Equal(16L, MigrateTests.Count(nc, "claim"));
+        var again = Core.Data.Migrator.Run(Samples.Map, old, neu, oc, Dialect.SqlServer, nc, Dialect.PostgreSql);
+        Assert.Equal(0L, again.Inserted);
+        Assert.Equal(225L, Core.Data.Migrator.Rollback(neu, nc, Dialect.PostgreSql, result.RunId));
+        Assert.Equal(0L, MigrateTests.Count(nc, "patient"));
+    }
+}

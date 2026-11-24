@@ -244,3 +244,44 @@ public sealed class RunWindowTests
         finally { w.Close(); }
     });
 }
+
+public sealed class MigrateWindowTests
+{
+    [Fact]
+    public void The_window_migrates_writes_the_script_suite_and_report_and_rolls_a_run_back() => HeadlessApp.Run(() =>
+    {
+        var root = Samples.Copy();
+        var w = new MainWindow(Path.Combine(root, "clinic.dmap"));
+        w.Show();
+        try
+        {
+            w.AskSure = _ => Task.FromResult(true);
+            var m = w.Migrate()!;
+            Assert.Equal(225, m.Inserted);
+            Assert.StartsWith("Migrated: 225 rows in, 49 rejected.", w.txtStatusBar.Text);
+            Assert.Equal([("done", 225L)], w.MigrationRuns.Select(r => (r.Status, r.Rows)));
+            Assert.Equal(0, w.Migrate()!.Inserted);
+            Assert.Contains("225 already in from an earlier run", w.txtStatusBar.Text);
+
+            Assert.NotNull(w.WriteScript(Path.Combine(root, "out.sql"), Core.Schema.Dialect.PostgreSql));
+            Assert.Contains("OVERRIDING SYSTEM VALUE", File.ReadAllText(Path.Combine(root, "out.sql")));
+            Assert.True(w.WriteParitySuite(Path.Combine(root, "proof.parity")));
+            Assert.True(File.Exists(Path.Combine(root, "proof-expected", "claim.csv")));
+            Assert.True(w.ExportReport(Path.Combine(root, "report.html")));
+            var html = File.ReadAllText(Path.Combine(root, "report.html"));
+            Assert.Contains("<h2>The migration</h2>", html);
+            Assert.Contains("Every row read is in, filtered out, already in from an earlier run, or rejected", html);
+            Assert.Contains("Dropped: the practice stopped faxing in 2019.", html);
+            Assert.DoesNotContain("HOLLOWAY", html);
+            Assert.True(w.ExportReport(Path.Combine(root, "report.xlsx")));
+            using (var book = new ClosedXML.Excel.XLWorkbook(Path.Combine(root, "report.xlsx")))
+                Assert.Equal(["Run", "Rejected", "Mapping", "Not migrated", "Checks"], book.Worksheets.Select(s => s.Name));
+
+            Assert.Equal(225, w.RollBack(w.MigrationRuns[0].RunId));
+            Assert.Equal("rolled back", w.MigrationRuns[0].Status);
+            var text = string.Join("\n", w.MigratePanel.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text));
+            Assert.Contains("rolled back", text);
+        }
+        finally { w.Close(); }
+    });
+}

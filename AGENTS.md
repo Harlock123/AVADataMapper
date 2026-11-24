@@ -20,6 +20,7 @@ cd samples && python3 make_samples.py        # remakes the sample databases (det
 MAPPER_SHOTS=/tmp/shots dotnet test --filter Screenshots                 # the README's pictures, headless
 MAPPER_TEST_MSSQL="Server=localhost,11453;User Id=sa;Password=…;TrustServerCertificate=True" \
 MAPPER_TEST_PG="Host=localhost;Port=15452;Username=postgres;Password=…;Database=postgres" dotnet test   # live servers
+MAPPER_PARITYCHECK=~/RiderProjects/AVAParityCheck dotnet test --filter HandoffTests   # AVAParityCheck passes the suite
 ```
 
 `dotnet test | head` stalls: write the output to a file and grep it. The live tests make a database of their own
@@ -52,11 +53,18 @@ docker run -d --name dm-mssql -e ACCEPT_EULA=1 -e MSSQL_SA_PASSWORD='…' -p 114
     connection), `Profiler` (nulls, blanks, lengths, shapes, commonest values, ranges, and the date formats text holds),
     `Engine` (makes every new row in load order through the filter and transforms, checks it as the new database would:
     foreign keys and codes, unique keys, its checks; keeps the key map; rejects with every reason, rows that point at a
-    rejected one naming its first cause; writes to an `IRowSink`), `DryRun` (the engine with a `CountingSink`).
+    rejected one naming its first cause; skips rows an earlier run put in; writes to an `IRowSink`), `DryRun` (the engine
+    with a `CountingSink`), `Migrator` (the engine with a `MigrationSink`, under the `Journal` it keeps in the new database:
+    avadm_runs and avadm_keys; reruns pick up from it, `Rollback` takes out exactly one run's rows).
+  - `Handoff/`: `ScriptWriter` (the migration as INSERTs for an empty database, keys written out, rejects listed),
+    `ParityPlan` (an AVAParityCheck suite: per new table, a CSV of the rows the mapping makes against a query of the new
+    table, both keyed on the old key through the journal, parents compared by their old keys), `MigrationReport` (the
+    sign-off report, HTML or Excel: counts that add up, rejects by old key, every column's mapping, decisions, checks).
 - `src/AVADataMapper/`: the window, built in code (`MainWindow.cs`: the trees, the mapping tab, undo;
   `MainWindow.Suggest.cs`: suggesting, confirming, the scan as evidence, the Coverage tab; `MainWindow.Checks.cs`: the
   Checks tab and the Try box; `MainWindow.Run.cs`: the Profile tab (and Use These Formats, Make Code Rows) and the Dry
-  Run tab; `MainWindow.Parts.cs`: the
+  Run tab; `MainWindow.Migrate.cs`: the Migrate tab, the runs and rollback, the script, the suite and the report;
+  `MainWindow.Parts.cs`: the
   hooks later parts fill; `ConnectDialog.cs`).
 - `tests/AVADataMapper.Tests/`: xUnit v3 on Avalonia.Headless. `LiveDatabases.cs` has the opt-in live servers.
 - `samples/`: an invented legacy clinic database (`old/`: SQL Server DDL and rows, and a SQLite copy) and its rebuild
@@ -77,6 +85,11 @@ docker run -d --name dm-mssql -e ACCEPT_EULA=1 -e MSSQL_SA_PASSWORD='…' -p 114
   guessed with a reason, and a person confirms it. Evidence makes a suggestion likelier; it never confirms one.
 - **A window test that fails leaves its window open, and Avalonia's reset then fails with `fonts:SystemFonts`,** which
   hides the real failure and breaks the tests after it: close windows in `finally`.
+- **A migration only writes where it's allowed to.** `MigrationSink.Begin` refuses a table holding rows the mapping
+  didn't put there; every row it writes goes in the journal, and rollback deletes only journaled rows. Never add a path
+  that updates or deletes rows outside the journal.
+- **The parity suite is proved in AVAParityCheck.** `MAPPER_PARITYCHECK=…/AVAParityCheck dotnet test --filter HandoffTests`
+  runs it there (its `--run`, exit 0): run that after changing the suite's format or the journal.
 - **The dry run and the migration are one engine** (`Engine.Run`), with a different sink: what the dry run says is
   what the migration does. The dry run reads the old database and writes nothing anywhere.
 - **One transform, everywhere.** The Try box, the dry run, the migration and the parity plan all go through
