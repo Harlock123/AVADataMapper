@@ -17,8 +17,10 @@ public static class MigrationReport
 {
     private static string H(string s) => WebUtility.HtmlEncode(s);
 
-    public static string Html(MapFile map, DatabaseSchema old, DatabaseSchema neu, IReadOnlyList<TableRun>? runs, string runKind, Evidence? evidence, DateTime made)
+    public static string Html(MapFile map, DatabaseSchema old, DatabaseSchema neu, IReadOnlyList<TableRun>? runs, string runKind, Evidence? evidence, DateTime made, Func<string, string>? mask = null, Func<string, string>? maskKey = null)
     {
+        mask ??= s => s;
+        maskKey ??= s => s;
         var findings = MapChecks.Check(map, old, neu);
         var coverage = Coverage.Of(map, old, neu, evidence);
         var sb = new StringBuilder();
@@ -43,9 +45,9 @@ public static class MigrationReport
             foreach (var r in runs.Where(r => r.Rejected > 0))
             {
                 sb.Append($"<h3>Rejected from {H(r.Target)}</h3><table><tr><th>Old key</th><th>Why</th></tr>");
-                foreach (var x in r.Rejects.Where(x => Engine.Root(x.Reasons[0]) == null)) sb.Append($"<tr><td><code>{H(r.From ?? "")} {H(x.OldKey)}</code></td><td>{H(string.Join("; ", x.Reasons))}</td></tr>");
+                foreach (var x in r.Rejects.Where(x => Engine.Root(x.Reasons[0]) == null)) sb.Append($"<tr><td><code>{H(r.From ?? "")} {H(maskKey(x.OldKey))}</code></td><td>{H(mask(string.Join("; ", x.Reasons)))}</td></tr>");
                 foreach (var g in r.Rejects.Where(x => Engine.Root(x.Reasons[0]) != null).GroupBy(x => Engine.Root(x.Reasons[0])!))
-                    sb.Append($"<tr><td><code>{H(string.Join(", ", g.Select(x => x.OldKey)))}</code></td><td class=\"dim\">Follow a row that's {H(g.Key)}</td></tr>");
+                    sb.Append($"<tr><td><code>{H(string.Join(", ", g.Select(x => maskKey(x.OldKey))))}</code></td><td class=\"dim\">Follow a row that's {H(mask(g.Key))}</td></tr>");
                 sb.Append("</table>");
             }
         }
@@ -88,15 +90,17 @@ public static class MigrationReport
         return sb.ToString();
     }
 
-    public static void Excel(string path, MapFile map, DatabaseSchema old, DatabaseSchema neu, IReadOnlyList<TableRun>? runs, Evidence? evidence)
+    public static void Excel(string path, MapFile map, DatabaseSchema old, DatabaseSchema neu, IReadOnlyList<TableRun>? runs, Evidence? evidence, Func<string, string>? mask = null, Func<string, string>? maskKey = null)
     {
+        mask ??= s => s;
+        maskKey ??= s => s;
         using var book = new XLWorkbook();
         if (runs != null)
             Table(book.AddWorksheet("Run"), ["New table", "From", "Read", "Filtered", "Already in", "In", "Rejected", "Their own"],
                 runs.Select(r => new object[] { r.Target, r.From ?? "rows given", r.Read, r.Filtered, r.Skipped, r.Inserted, r.Rejected, r.Rejected - r.Followed }));
         if (runs != null)
             Table(book.AddWorksheet("Rejected"), ["New table", "Old table", "Old key", "Why", "Follows"],
-                runs.SelectMany(r => r.Rejects.Select(x => new object[] { r.Target, r.From ?? "", x.OldKey, string.Join("; ", x.Reasons), Engine.Root(x.Reasons[0]) != null ? "yes" : "" })));
+                runs.SelectMany(r => r.Rejects.Select(x => new object[] { r.Target, r.From ?? "", maskKey(x.OldKey), mask(string.Join("; ", x.Reasons)), Engine.Root(x.Reasons[0]) != null ? "yes" : "" })));
         Table(book.AddWorksheet("Mapping"), ["New table", "From", "Where", "New column", "Type", "Kind", "How", "Certainty", "Why"],
             neu.LoadOrder().SelectMany(t => t.Columns.Select(c => (t, c, tm: map.Table(t.Name)))).Select(x =>
             {

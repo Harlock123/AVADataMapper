@@ -16,8 +16,8 @@ public sealed partial class MainWindow
     public StackPanel ProfilePanel { get; } = new() { Spacing = 2 };
     public StackPanel DryRunPanel { get; } = new() { Margin = new Thickness(20, 14), Spacing = 4 };
 
-    public TableProfile? Profile { get; private set; }
-    public List<TableRun>? LastRun { get; private set; }
+    public TableProfile? Profile => Work.Profile;
+    public List<TableRun>? LastRun => Work.LastRun;
 
     private Control BuildProfilePage()
     {
@@ -38,21 +38,9 @@ public sealed partial class MainWindow
     /// <summary>Profiles an old table's rows, and shows what each column holds and suggests.</summary>
     public TableProfile? ProfileOld(string table)
     {
-        if (Old?.Table(table) is not { } t) { Say($"The old database has no table {table}."); return null; }
-        try
-        {
-            var (c, d) = Core.Data.Rows.OpenSide(Map.Source, MapPath, Connections);
-            using (c) Profile = Profiler.Profile(c, d, t);
-            ProfileTable.SelectedItem = t.Name;
-            ShowProfile();
-            Say($"Profiled {t.Name}: {Profile.Rows:N0} rows.");
-            return Profile;
-        }
-        catch (Exception e) when (e is InvalidOperationException or System.Data.Common.DbException or IOException)
-        {
-            Say($"Couldn't profile {table}: {e.Message}");
-            return null;
-        }
+        var p = Work.ProfileOld(table);
+        if (p != null) ProfileTable.SelectedItem = Old?.Table(table)?.Name;
+        return p;
     }
 
     private void ShowProfile()
@@ -123,71 +111,15 @@ public sealed partial class MainWindow
     }
 
     /// <summary>Sets a date conversion's formats to the ones the profile found (one undo step).</summary>
-    public void UseFormats(string table, string column)
-    {
-        if (Profile == null || Map.Table(table)?.Column(column) is not { From: { } from } cm || Profile.Column(from) is not { } cp) return;
-        Change($"used the profile's date formats for {table}.{column}", () =>
-        {
-            cm.Formats = [.. (cm.Formats ?? []).Concat(cp.DateFormats).Distinct(StringComparer.Ordinal)];
-            cm.BlankIsNull ??= cp.Blanks > 0 ? true : null;
-        });
-        ShowProfile();
-        Say($"{table}.{column} reads {string.Join(", ", cm.Formats!)}." + (cp.NotDates.Count > 0 ? $" Still not dates: {string.Join(", ", cp.NotDates.Take(6))}." : ""));
-    }
+    public void UseFormats(string table, string column) => Work.UseFormats(table, column);
 
-    /// <summary>
-    /// Fills a lookup's code table from the codes the profile found (meanings start as the codes: change them), and maps
-    /// each code to itself (trimmed, in capitals) where the lookup doesn't say yet. One undo step.
-    /// </summary>
-    public void UseCodes(string table, string column)
-    {
-        if (Profile == null || Map.Table(table)?.Column(column) is not { From: { } from, Table: { } codeTable } cm || Profile.Column(from) is not { } cp || Map.Table(codeTable) is not { From: null } code) return;
-        var target = New?.Table(codeTable);
-        var key = target?.PrimaryKey.FirstOrDefault() ?? "code";
-        var other = target?.Columns.FirstOrDefault(c => !c.Name.Equals(key, StringComparison.OrdinalIgnoreCase) && !c.Identity && !c.Nullable)?.Name;
-        Change($"made {codeTable}'s rows from {from}'s codes", () =>
-        {
-            code.Rows ??= [];
-            cm.Map ??= [];
-            foreach (var v in cp.Top.Select(t => t.Value.Trim().ToUpperInvariant()).Distinct())
-            {
-                if (!code.Rows.Any(r => string.Equals(Expression.Str(Core.Mapping.Transforms.Clr(r.GetValueOrDefault(key))), v, StringComparison.OrdinalIgnoreCase)))
-                {
-                    var r = new Dictionary<string, JsonNode?> { [key] = v };
-                    if (other != null) r[other] = v;
-                    code.Rows.Add(r);
-                }
-                if (!cm.Map.Keys.Contains(v, StringComparer.OrdinalIgnoreCase)) cm.Map[v] = v;
-            }
-            cm.Trim ??= true;
-        });
-        ShowProfile();
-        Say($"{codeTable} has {code.Rows!.Count} rows now. Their meanings are the codes for now: say what each means (Mapping tab, {codeTable}).");
-    }
+    /// <summary>Fills a lookup's code table from the codes the profile found, and maps each to itself. One undo step.</summary>
+    public void UseCodes(string table, string column) => Work.UseCodes(table, column);
 
     // ───────────────────────────── the dry run ─────────────────────────────
 
     /// <summary>Runs the whole mapping on the old rows in memory, and shows what would go in and what would be rejected. Writes nothing.</summary>
-    public List<TableRun>? RunDryRun()
-    {
-        if (Old == null || New == null) { Say("Open both schemas first."); return null; }
-        if (Findings.Any(f => f.Severity == Severity.Error)) { Say($"The mapping has {Findings.Count(f => f.Severity == Severity.Error)} errors (the Checks tab): fix them first."); return null; }
-        try
-        {
-            var (c, d) = Core.Data.Rows.OpenSide(Map.Source, MapPath, Connections);
-            using (c) LastRun = DryRun.Run(Map, Old, New, c, d);
-            ShowDryRun();
-            var inserted = LastRun.Sum(r => r.Inserted);
-            var rejected = LastRun.Sum(r => r.Rejected);
-            Say($"Dry run: {inserted:N0} rows would go in, {rejected:N0} would be rejected ({rejected - LastRun.Sum(r => r.Followed):N0} for their own values). Nothing was written.");
-            return LastRun;
-        }
-        catch (Exception e) when (e is InvalidOperationException or System.Data.Common.DbException or IOException or FormatException)
-        {
-            Say($"The dry run couldn't run: {e.Message}");
-            return null;
-        }
-    }
+    public List<TableRun>? RunDryRun() => Work.DryRun();
 
     private void ShowDryRun()
     {

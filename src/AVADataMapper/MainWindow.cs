@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using AVADataMapper.Core.Mapping;
 using AVADataMapper.Core.Schema;
+using AVADataMapper.Core.Session;
 
 namespace AVADataMapper;
 
@@ -20,8 +21,6 @@ public sealed record ColumnRow(Column Column, ColumnMap? Map, Grid View);
 /// </summary>
 public sealed partial class MainWindow : Window
 {
-    private readonly Stack<string> _undo = new();
-    private readonly Stack<string> _redo = new();
     private string? _table;
     private string? _column;
     private bool _filling;
@@ -43,15 +42,18 @@ public sealed partial class MainWindow : Window
 
     public List<ColumnRow> Rows { get; } = [];
 
+    /// <summary>The mapping being worked on, shared with AI agents: everything below reads from it.</summary>
+    public MapSession Work { get; }
+
     /// <summary>The mapping open (a new, empty one at first).</summary>
-    public MapFile Map { get; private set; } = new();
+    public MapFile Map => Work.Map;
 
     /// <summary>Where the mapping is saved (null: not yet).</summary>
-    public string? MapPath { get; private set; }
+    public string? MapPath => Work.MapPath;
 
-    public DatabaseSchema? Old { get; private set; }
-    public DatabaseSchema? New { get; private set; }
-    public bool Dirty { get; private set; }
+    public DatabaseSchema? Old => Work.Old;
+    public DatabaseSchema? New => Work.New;
+    public bool Dirty => Work.Dirty;
 
     /// <summary>The new table on show, and the column selected in it.</summary>
     public string? CurrentTable => _table;
@@ -79,6 +81,9 @@ public sealed partial class MainWindow : Window
         PickFile = AskForFile;
         PickSaveFile = AskWhereToSave;
         PickConnection = title => ConnectDialog.Ask(this, title);
+        Work = new MapSession(new SavedConnections(SettingsFolder));
+        Work.Said += Say;
+        Work.Changed += Refresh;
 
         var root = new DockPanel();
         var menu = BuildMenu();
@@ -200,9 +205,7 @@ public sealed partial class MainWindow : Window
         };
         WhereBox.LostFocus += (_, _) =>
         {
-            if (_table == null || Map.Table(_table) is not { } tm) return;
-            var w = string.IsNullOrWhiteSpace(WhereBox.Text) ? null : WhereBox.Text.Trim();
-            if (w != tm.Where) Change($"filtered {_table}", () => tm.Where = w);
+            if (_table != null) Work.SetWhere(_table, WhereBox.Text);
         };
         var apply = new Button { Content = "Apply", Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Bottom };
         apply.Click += (_, _) => ApplyColumnJson();
@@ -252,136 +255,29 @@ public sealed partial class MainWindow : Window
 
     public void NewMap()
     {
-        Map = new MapFile();
-        MapPath = null;
-        Old = New = null;
-        Evidence = null;
         _table = _column = null;
-        _undo.Clear();
-        _redo.Clear();
-        Dirty = false;
-        Refresh();
-        Say("A new mapping: open the old and new schemas (File menu).");
+        Work.NewMap();
     }
 
     /// <summary>Opens a mapping and the schemas it names (files beside it, or saved connections called old and new).</summary>
     public void OpenMap(string path)
     {
-        try
+        _table = null;
+        _column = null;
+        if (Work.OpenMap(path))
         {
-            Map = MapFile.Load(path);
-            MapPath = Path.GetFullPath(path);
-            _undo.Clear();
-            _redo.Clear();
-            Dirty = false;
             _table = Map.Tables.FirstOrDefault()?.Target;
-            _column = null;
-            var said = new List<string>();
-            LoadEvidence();
-            Old = LoadSide(Map.Source, said);
-            New = LoadSide(Map.Target, said);
-            Refresh();
-            Say($"Opened {Path.GetFileName(path)}: {Map.Tables.Count} tables mapped." + (said.Count > 0 ? " " + string.Join(" ", said) : ""));
+            ShowTable(_table);
         }
-        catch (Exception e) when (e is IOException or FormatException or UnauthorizedAccessException)
-        {
-            Say($"Couldn't open {Path.GetFileName(path)}: {e.Message}");
-        }
-    }
-
-    private DatabaseSchema? LoadSide(Side side, List<string> said)
-    {
-        try
-        {
-            if (MapFile.FullPath(side, MapPath) is { } file) return SchemaFiles.Load(file, side.Dialect == Dialect.Sqlite && SchemaFiles.IsSqlite(file) ? null : side.Dialect);
-            if (Connections.Get(side.Name) is { } saved)
-            {
-                using var c = Catalogs.Open(saved.Dialect, saved.Connection);
-                return Catalogs.Read(c, saved.Dialect, Catalogs.Describe(saved.Dialect, saved.Connection));
-            }
-            said.Add($"The {side.Name} database ({side.Described ?? side.Dialect.ToString()}) isn't connected: File › Connect to the {(side == Map.Source ? "Old" : "New")} Database.");
-        }
-        catch (Exception e) when (e is IOException or FormatException or System.Data.Common.DbException or InvalidOperationException or ArgumentException)
-        {
-            said.Add($"The {side.Name} schema couldn't be read: {e.Message}");
-        }
-        return null;
     }
 
     /// <summary>Opens a schema from a file (a SQLite database or a DDL script) as the old or the new side.</summary>
-    public void OpenSchema(bool old, string path, Dialect? dialect = null)
-    {
-        try
-        {
-            var schema = SchemaFiles.Load(path, dialect);
-            var side = old ? Map.Source : Map.Target;
-            Change($"opened the {(old ? "old" : "new")} schema", () =>
-            {
-                side.Dialect = schema.Dialect;
-                side.File = Relative(Path.GetFullPath(path));
-                side.Described = schema.Source;
-            });
-            if (old) Old = schema;
-            else New = schema;
-            Refresh();
-            Say($"The {(old ? "old" : "new")} schema: {schema.Tables.Count} tables from {schema.Source} ({schema.Dialect}).");
-        }
-        catch (Exception e) when (e is IOException or FormatException or UnauthorizedAccessException or System.Data.Common.DbException)
-        {
-            Say($"Couldn't read {Path.GetFileName(path)}: {e.Message}");
-        }
-    }
+    public void OpenSchema(bool old, string path, Dialect? dialect = null) => Work.OpenSchema(old, path, dialect);
 
     /// <summary>Reads a live database's schema as the old or new side, and keeps the connection (by name, outside the mapping).</summary>
-    public void ConnectSchema(bool old, Dialect dialect, string connection)
-    {
-        try
-        {
-            var described = Catalogs.Describe(dialect, connection);
-            DatabaseSchema schema;
-            using (var c = Catalogs.Open(dialect, connection)) schema = Catalogs.Read(c, dialect, described);
-            var side = old ? Map.Source : Map.Target;
-            Connections.Set(side.Name, dialect, connection);
-            Change($"connected the {(old ? "old" : "new")} database", () =>
-            {
-                side.Dialect = dialect;
-                side.File = null;
-                side.Described = described;
-            });
-            if (old) Old = schema;
-            else New = schema;
-            Refresh();
-            Say($"The {(old ? "old" : "new")} database {described}: {schema.Tables.Count} tables. The connection is kept in your settings, not in the mapping.");
-        }
-        catch (Exception e) when (e is System.Data.Common.DbException or InvalidOperationException or ArgumentException or IOException)
-        {
-            Say($"Couldn't connect: {e.Message}");
-        }
-    }
+    public void ConnectSchema(bool old, Dialect dialect, string connection) => Work.ConnectSchema(old, dialect, connection);
 
-    /// <summary>A side's file as the mapping keeps it: relative to the mapping file when it's saved.</summary>
-    private string Relative(string full) => MapPath == null ? full : Path.GetRelativePath(Path.GetDirectoryName(MapPath)!, full).Replace('\\', '/');
-
-    public void SaveMap(string path)
-    {
-        try
-        {
-            var full = Path.GetFullPath(path);
-            // Files the sides read stay found: relative to where the mapping is now.
-            foreach (var side in new[] { Map.Source, Map.Target })
-                if (MapFile.FullPath(side, MapPath) is { } f) side.File = Path.GetRelativePath(Path.GetDirectoryName(full)!, f).Replace('\\', '/');
-            if (Map.Evidence != null && MapFile.FullPath(new Side { File = Map.Evidence }, MapPath) is { } ev) Map.Evidence = Path.GetRelativePath(Path.GetDirectoryName(full)!, ev).Replace('\\', '/');
-            Map.Save(full);
-            MapPath = full;
-            Dirty = false;
-            Title = $"AVA Data Mapper: {Path.GetFileName(full)}";
-            Say($"Saved {Path.GetFileName(full)}.");
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            Say($"Couldn't save: {e.Message}");
-        }
-    }
+    public void SaveMap(string path) => Work.SaveMap(path);
 
     private async Task Save()
     {
@@ -412,92 +308,23 @@ public sealed partial class MainWindow : Window
     // ───────────────────────────── changing the mapping ─────────────────────────────
 
     /// <summary>Makes a change to the mapping as one undo step.</summary>
-    public void Change(string what, Action change)
-    {
-        _undo.Push(Map.ToJson());
-        _redo.Clear();
-        change();
-        Dirty = true;
-        LastChange = what;
-        Refresh();
-    }
+    public void Change(string what, Action change) => Work.Change(what, change);
 
     /// <summary>What the last change was (for the status line and tests).</summary>
-    public string? LastChange { get; private set; }
+    public string? LastChange => Work.LastChange;
 
-    public void Undo()
-    {
-        if (_undo.Count == 0) { Say("Nothing to undo."); return; }
-        _redo.Push(Map.ToJson());
-        Map = MapFile.Read(_undo.Pop());
-        Dirty = true;
-        Refresh();
-        Say("Undone.");
-    }
+    public void Undo() => Work.Undo();
 
-    public void Redo()
-    {
-        if (_redo.Count == 0) { Say("Nothing to redo."); return; }
-        _undo.Push(Map.ToJson());
-        Map = MapFile.Read(_redo.Pop());
-        Dirty = true;
-        Refresh();
-        Say("Redone.");
-    }
-
-    /// <summary>The table map for a new table, made when it's first given a source.</summary>
-    private TableMap Ensure(string target)
-    {
-        if (Map.Table(target) is { } tm) return tm;
-        var table = New?.Table(target);
-        tm = new TableMap { Target = table?.Name ?? target };
-        Map.Tables.Add(tm);
-        return tm;
-    }
+    public void Redo() => Work.Redo();
 
     /// <summary>Says which old table a new one's rows come from (null: rows given, for a code table).</summary>
-    public void SetSource(string target, string? from) =>
-        Change($"set {target}'s source to {from ?? "rows given"}", () =>
-        {
-            var tm = Ensure(target);
-            tm.From = from == null ? null : Old?.Table(from)?.Name ?? from;
-            if (New?.Table(target) is { } t)
-                foreach (var c in t.Columns.Where(c => c.Identity && tm.Column(c.Name) == null))
-                    tm.Columns.Add(new ColumnMap { Target = c.Name, Kind = ColumnKind.Generated });
-        });
+    public void SetSource(string target, string? from) => Work.SetSource(target, from);
 
-    /// <summary>Says how a new column is filled: its kind and the old column it reads (a key or lookup's table from the new foreign key).</summary>
-    public void SetColumn(string target, string column, ColumnKind kind, string? from = null)
-    {
-        Change($"mapped {target}.{column}", () =>
-        {
-            var tm = Ensure(target);
-            var cm = tm.Column(column);
-            if (cm == null)
-            {
-                cm = new ColumnMap { Target = New?.Table(target)?.Column(column)?.Name ?? column };
-                tm.Columns.Add(cm);
-                Order(tm);
-            }
-            cm.Kind = kind;
-            cm.From = from ?? (kind is ColumnKind.Constant or ColumnKind.Default or ColumnKind.Generated ? null : cm.From);
-            cm.Certainty = Certainty.Confirmed;
-            if (kind is ColumnKind.Key or ColumnKind.Lookup && cm.Table == null && New?.Table(target) is { } t
-                && t.ForeignKeys.FirstOrDefault(f => f.Columns.Count == 1 && f.Columns[0].Equals(column, StringComparison.OrdinalIgnoreCase)) is { } fk)
-                cm.Table = New.Table(fk.RefTable)?.Name ?? fk.RefTable;
-        });
-    }
+    /// <summary>Says how a new column is filled: its kind and the old column it reads.</summary>
+    public void SetColumn(string target, string column, ColumnKind kind, string? from = null) => Work.SetColumn(target, column, kind, from);
 
     /// <summary>Takes a new column out of the mapping (it's filled by nothing).</summary>
-    public void Unmap(string target, string column) =>
-        Change($"unmapped {target}.{column}", () => Map.Table(target)?.Columns.RemoveAll(c => c.Target.Equals(column, StringComparison.OrdinalIgnoreCase)));
-
-    /// <summary>Puts a table map's columns in the new table's order.</summary>
-    private void Order(TableMap tm)
-    {
-        if (New?.Table(tm.Target) is not { } t) return;
-        tm.Columns = [.. tm.Columns.OrderBy(c => t.Column(c.Target)?.Ordinal ?? int.MaxValue)];
-    }
+    public void Unmap(string target, string column) => Work.Unmap(target, column);
 
     /// <summary>Replaces the selected column's map with the JSON in the editor below the columns.</summary>
     public void ApplyColumnJson()
@@ -507,15 +334,8 @@ public sealed partial class MainWindow : Window
         {
             var cm = JsonSerializer.Deserialize<ColumnMap>(ColumnJson.Text ?? "", MapFile.Json) ?? throw new FormatException("It's empty.");
             cm.Target = _column;
-            var table = _table;
-            Change($"edited {table}.{cm.Target}", () =>
-            {
-                var tm = Ensure(table);
-                tm.Columns.RemoveAll(c => c.Target.Equals(cm.Target, StringComparison.OrdinalIgnoreCase));
-                tm.Columns.Add(cm);
-                Order(tm);
-            });
-            Say($"{table}.{cm.Target}: {Describe(cm)}.");
+            Work.PutColumn(_table, cm);
+            Say($"{_table}.{cm.Target}: {Describe(cm)}.");
         }
         catch (Exception e) when (e is JsonException or FormatException)
         {
@@ -560,7 +380,7 @@ public sealed partial class MainWindow : Window
         {
             _filling = false;
         }
-        Findings = Old != null && New != null ? MapChecks.Check(Map, Old, New) : [];
+        Findings = Work.Findings;
         ShowTable(_table, _column);
         Changed();
     }

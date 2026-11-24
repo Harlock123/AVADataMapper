@@ -23,7 +23,11 @@ public sealed class App : Application
         {
             // AVADataMapper [map.dmap]: opens the mapping and the schemas it names.
             var args = desktop.Args ?? [];
-            desktop.MainWindow = new MainWindow(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)));
+            desktop.MainWindow = new MainWindow(args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal)))
+            {
+                RealFromCommandLine = args.Contains("--real"),
+                ForceDeidentify = args.Contains("--mask"),
+            };
         }
         base.OnFrameworkInitializationCompleted();
     }

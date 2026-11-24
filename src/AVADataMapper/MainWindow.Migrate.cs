@@ -18,132 +18,23 @@ public sealed partial class MainWindow
     /// <summary>Asks before a migration writes (the question); tests answer it themselves.</summary>
     public Func<string, Task<bool>> AskSure { get; set; } = null!;
 
-    public MigrationResult? LastMigration { get; private set; }
-    public List<RunRecord> MigrationRuns { get; private set; } = [];
+    public MigrationResult? LastMigration => Work.LastMigration;
+    public List<RunRecord> MigrationRuns => Work.Runs;
 
     /// <summary>Migrates into the new database (after the checks), keeping a journal; a rerun picks up where the last stopped.</summary>
-    public MigrationResult? Migrate()
-    {
-        if (Old == null || New == null) { Say("Open both schemas first."); return null; }
-        try
-        {
-            var (oc, od) = Core.Data.Rows.OpenSide(Map.Source, MapPath, Connections);
-            using (oc)
-            {
-                var (nc, nd) = Core.Data.Rows.OpenSide(Map.Target, MapPath, Connections);
-                using (nc)
-                {
-                    LastMigration = Migrator.Run(Map, Old, New, oc, od, nc, nd);
-                    MigrationRuns = Journal.List(nc, nd, Map.Id);
-                }
-            }
-            LastRun = LastMigration.Tables;
-            ShowMigrate();
-            ShowDryRun();
-            Say($"Migrated: {LastMigration.Inserted:N0} rows in, {LastMigration.Rejected:N0} rejected" + (LastMigration.Skipped > 0 ? $", {LastMigration.Skipped:N0} already in from an earlier run" : "") + ". Write the parity suite to prove it.");
-            return LastMigration;
-        }
-        catch (Exception e) when (e is InvalidOperationException or System.Data.Common.DbException or IOException)
-        {
-            Say($"The migration didn't run: {e.Message}");
-            return null;
-        }
-    }
+    public MigrationResult? Migrate() => Work.Migrate();
 
     /// <summary>Takes out exactly the rows one run put in; nothing else is touched.</summary>
-    public long RollBack(string runId)
-    {
-        if (New == null) return 0;
-        try
-        {
-            var (nc, nd) = Core.Data.Rows.OpenSide(Map.Target, MapPath, Connections);
-            using (nc)
-            {
-                var n = Migrator.Rollback(New, nc, nd, runId);
-                MigrationRuns = Journal.List(nc, nd, Map.Id);
-                ShowMigrate();
-                Say($"Rolled back: {n:N0} rows the run put in are out again. Nothing else was touched.");
-                return n;
-            }
-        }
-        catch (Exception e) when (e is InvalidOperationException or System.Data.Common.DbException or IOException)
-        {
-            Say($"Couldn't roll back: {e.Message}");
-            return 0;
-        }
-    }
-
-    private void LoadRuns()
-    {
-        MigrationRuns = [];
-        if (New == null) return;
-        try
-        {
-            var (nc, nd) = Core.Data.Rows.OpenSide(Map.Target, MapPath, Connections);
-            using (nc) MigrationRuns = Journal.List(nc, nd, Map.Id);
-        }
-        catch (Exception e) when (e is InvalidOperationException or System.Data.Common.DbException or IOException) { }
-    }
+    public long RollBack(string runId) => Work.RollBack(runId);
 
     /// <summary>Writes the migration as a SQL script for an empty new database (in the new database's dialect, unless given).</summary>
-    public List<TableRun>? WriteScript(string path, Dialect? dialect = null)
-    {
-        if (Old == null || New == null) { Say("Open both schemas first."); return null; }
-        try
-        {
-            var (oc, od) = Core.Data.Rows.OpenSide(Map.Source, MapPath, Connections);
-            using (oc)
-            {
-                using var w = new StreamWriter(path);
-                var runs = ScriptWriter.Write(Map, Old, New, oc, od, dialect ?? Map.Target.Dialect, w);
-                Say($"Wrote {Path.GetFileName(path)}: {runs.Sum(r => r.Inserted):N0} rows as INSERTs for an empty {dialect ?? Map.Target.Dialect} database, the {runs.Sum(r => r.Rejected):N0} rejected listed at its end.");
-                return runs;
-            }
-        }
-        catch (Exception e) when (e is InvalidOperationException or System.Data.Common.DbException or IOException or UnauthorizedAccessException)
-        {
-            Say($"Couldn't write the script: {e.Message}");
-            return null;
-        }
-    }
+    public List<TableRun>? WriteScript(string path, Dialect? dialect = null) => Work.WriteScript(path, dialect);
 
-    /// <summary>Writes the AVAParityCheck suite that proves the migration: expected rows (CSV) against the new tables, by old key.</summary>
-    public bool WriteParitySuite(string path)
-    {
-        if (Old == null || New == null) { Say("Open both schemas first."); return false; }
-        try
-        {
-            var (oc, od) = Core.Data.Rows.OpenSide(Map.Source, MapPath, Connections);
-            using (oc) ParityPlan.Write(Map, MapPath, Old, New, oc, od, Map.Target.Dialect, path);
-            Say($"Wrote {Path.GetFileName(path)}: open it in AVAParityCheck (or AVAParityCheck --run) after the migration. Every new table's rows are checked against what the mapping makes, by old key." +
-                (Map.Target.File == null ? " Name the new database \"new\" in AVAParityCheck's connections." : ""));
-            return true;
-        }
-        catch (Exception e) when (e is InvalidOperationException or System.Data.Common.DbException or IOException or UnauthorizedAccessException)
-        {
-            Say($"Couldn't write the parity suite: {e.Message}");
-            return false;
-        }
-    }
+    /// <summary>Writes the AVAParityCheck suite that proves the migration.</summary>
+    public bool WriteParitySuite(string path) => Work.WriteParitySuite(path);
 
     /// <summary>Writes the sign-off report (.html, or .xlsx for a workbook) with the last dry run or migration.</summary>
-    public bool ExportReport(string path)
-    {
-        if (Old == null || New == null) { Say("Open both schemas first."); return false; }
-        try
-        {
-            var kind = LastMigration != null && ReferenceEquals(LastRun, LastMigration.Tables) ? "migration" : "dry run";
-            if (path.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)) MigrationReport.Excel(path, Map, Old, New, LastRun, Evidence);
-            else File.WriteAllText(path, MigrationReport.Html(Map, Old, New, LastRun, kind, Evidence, DateTime.Now));
-            Say($"Wrote {Path.GetFileName(path)}." + (LastRun == null ? " Run the dry run first to include what would go in and what wouldn't." : ""));
-            return true;
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            Say($"Couldn't write the report: {e.Message}");
-            return false;
-        }
-    }
+    public bool ExportReport(string path) => Work.ExportReport(path);
 
     private async Task MigrateAsked()
     {
@@ -227,15 +118,11 @@ public sealed partial class MainWindow
     partial void Ran()
     {
         ProfileTable.ItemsSource = Old?.Tables.Select(t => t.Name).ToList();
-        if (_runsFor != (Map.Id, New?.Source))
-        {
-            _runsFor = (Map.Id, New?.Source);
-            LoadRuns();
-            ShowMigrate();
-        }
+        if (Profile != null) ProfileTable.SelectedItem = Profile.Table;
+        ShowProfile();
+        ShowDryRun();
+        ShowMigrate();
     }
-
-    private (string, string?) _runsFor;
 
     private partial IEnumerable<object> EvenLaterMappingItems(Func<string, Action, Key?, KeyModifiers, MenuItem> item) =>
     [

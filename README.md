@@ -4,7 +4,7 @@ Move a legacy system's data into its rebuild, and prove it arrived. AVA Data Map
 the new one's (SQL Server, PostgreSQL or SQLite, live or from DDL scripts) and keeps a mapping of how every new table
 and column is filled from the old: copied, converted, looked up, split, joined, or through the new keys.
 
-*Work in progress: milestone 5 of 7 (the migration, the script, the parity suite and the report).*
+*Work in progress: milestone 6 of 7 (AI agents: an MCP server with 46 tools and 8 recipes, and the AI Chat).*
 
 ## Running it
 

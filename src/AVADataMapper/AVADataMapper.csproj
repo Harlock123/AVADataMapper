@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- The window: the old schema, the new schema, and the mapping between them. -->
+  <!-- The window: the old schema, the new schema, and the mapping between them; the AI Chat (F12) and the doors
+       for outside agents. -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <AssemblyName>AVADataMapper</AssemblyName>
@@ -15,7 +16,16 @@
     <!-- Avalonia.FreeDesktop 11.3.12 pulls Tmds.DBus.Protocol 0.21.2, which has a high-severity advisory
          (CVE-2026-39959); take the patched one. -->
     <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
+    <!-- The MCP server with no window: Avalonia headless with Skia, so render_view draws as the window does. -->
+    <PackageReference Include="Avalonia.Headless" Version="11.3.12" />
+    <PackageReference Include="Avalonia.Skia" Version="11.3.12" />
+    <!-- The AI Chat's Anthropic API (Claude, or a local server that speaks it). -->
+    <PackageReference Include="Anthropic" Version="13.3.0" />
     <ProjectReference Include="..\AVADataMapper.Core\AVADataMapper.Core.csproj" />
+    <ProjectReference Include="..\AVADataMapper.Mcp\AVADataMapper.Mcp.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="AVADataMapper.Tests" />

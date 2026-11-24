@@ -16,6 +16,7 @@ the rebuild matches (AVAParityCheck).
 dotnet build AVADataMapper.slnx
 dotnet test AVADataMapper.slnx
 dotnet run --project src/AVADataMapper [map.dmap]
+dotnet run --project src/AVADataMapper -- --mcp --root samples   # the MCP server with no window (--attach: the open one)
 cd samples && python3 make_samples.py        # remakes the sample databases (deterministic: tests count their rows)
 MAPPER_SHOTS=/tmp/shots dotnet test --filter Screenshots                 # the README's pictures, headless
 MAPPER_TEST_MSSQL="Server=localhost,11453;User Id=sa;Password=…;TrustServerCertificate=True" \
@@ -60,12 +61,21 @@ docker run -d --name dm-mssql -e ACCEPT_EULA=1 -e MSSQL_SA_PASSWORD='…' -p 114
     `ParityPlan` (an AVAParityCheck suite: per new table, a CSV of the rows the mapping makes against a query of the new
     table, both keyed on the old key through the journal, parents compared by their old keys), `MigrationReport` (the
     sign-off report, HTML or Excel: counts that add up, rejects by old key, every column's mapping, decisions, checks).
+  - `Session/`: `MapSession` (everything done to a mapping, with its undo history: the window and agents both work
+    through it, so an agent's change is one undo step the person can take back), `Mask` (values as agents see them:
+    letters kept as the first one and stars, digits as 9; numeric keys stay; code-like columns stay readable).
+- `src/AVADataMapper.Mcp/`: the MCP server (no Avalonia). `MapperTools` (the tools, on a `MapSession` through
+  `IExplorerHost`), `MapperTools.Orchestration` (batch, recordings, saved steps, checkpoints of the mapping's JSON),
+  `Recipes` (the prompts), `Hosting` (headless and window sessions), `LiveBridge`/`LiveListener` (the pipe to the open
+  window), `NetworkListener` (HTTP with a token, port 8778), `McpCommandLine` (`--mcp`), `Workspace` (the working folder:
+  agents only ever write new files in it).
 - `src/AVADataMapper/`: the window, built in code (`MainWindow.cs`: the trees, the mapping tab, undo;
   `MainWindow.Suggest.cs`: suggesting, confirming, the scan as evidence, the Coverage tab; `MainWindow.Checks.cs`: the
   Checks tab and the Try box; `MainWindow.Run.cs`: the Profile tab (and Use These Formats, Make Code Rows) and the Dry
   Run tab; `MainWindow.Migrate.cs`: the Migrate tab, the runs and rollback, the script, the suite and the report;
   `MainWindow.Parts.cs`: the
-  hooks later parts fill; `ConnectDialog.cs`).
+  hooks later parts fill; `MainWindow.AI.cs` and `MainWindow.Agents.cs`: the AI menu, the doors and the view as agents
+  see it; `Agents/`: the AI Chat, its settings, `--mcp` and `ViewPainter`; `ConnectDialog.cs`).
 - `tests/AVADataMapper.Tests/`: xUnit v3 on Avalonia.Headless. `LiveDatabases.cs` has the opt-in live servers.
 - `samples/`: an invented legacy clinic database (`old/`: SQL Server DDL and rows, and a SQLite copy) and its rebuild
   (`new/`: PostgreSQL DDL, a SQLite copy), from `make_samples.py`; `clinic.dmap` maps one to the other.
@@ -95,6 +105,15 @@ docker run -d --name dm-mssql -e ACCEPT_EULA=1 -e MSSQL_SA_PASSWORD='…' -p 114
 - **One transform, everywhere.** The Try box, the dry run, the migration and the parity plan all go through
   `Transforms.Apply`, so what's tried is what's done. Expressions are the mapping's own language, never SQL passed to a
   database.
+- **Agents see values masked unless the person allows them** (`Mask`; AI › Let AI Agents See Values, `--real`,
+  `--mask`). Every tool's answer says `values_masked`. Schemas, mappings, checks and the old code's evidence are not
+  values and are shown in full. A tool that returns old-database values must mask them; the no-leak test
+  (`AgentTests.No_tool_result_carries_…`) calls every reading tool on the samples and looks for every person's value:
+  add a new tool to it.
+- **Agents propose, people decide.** What an agent maps is marked likely ("Proposed by an AI agent"); `confirm` asks the
+  person in the window; `migrate` and `roll_back` run only in the open window after the person's yes; the script and
+  the parity suite (they hold the data) need values allowed.
+- **The AI Chat is a copy** of AVAModeler.Chat's (as in the other AVA apps): fix a chat bug in all of them.
 - **No real data in the repository.** Every person, payer and number in the samples is invented.
 
 ## Making a change

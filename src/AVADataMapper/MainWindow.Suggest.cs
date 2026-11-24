@@ -13,80 +13,25 @@ public sealed partial class MainWindow
     public StackPanel CoveragePanel { get; } = new() { Margin = new Thickness(20, 14), Spacing = 4 };
 
     /// <summary>What the old system's code says, from an AVALegacyLens scan (null: none open).</summary>
-    public Evidence? Evidence { get; private set; }
+    public Evidence? Evidence => Work.Evidence;
 
     public List<CoverageItem> CoverageItems { get; private set; } = [];
 
-    private void LoadEvidence()
-    {
-        Evidence = null;
-        if (Map.Evidence == null) return;
-        var path = MapFile.FullPath(new Side { File = Map.Evidence }, MapPath);
-        try
-        {
-            if (path != null) Evidence = Evidence.Load(path);
-        }
-        catch (Exception e) when (e is IOException or FormatException or UnauthorizedAccessException)
-        {
-            Say($"The scan {Map.Evidence} couldn't be read: {e.Message}");
-        }
-    }
-
     /// <summary>Uses an AVALegacyLens scan of the old system as evidence (kept in the mapping, as a path).</summary>
-    public void OpenEvidence(string path)
-    {
-        try
-        {
-            var ev = Evidence.Load(path);
-            Change("opened a scan of the old system", () => Map.Evidence = MapPath == null ? Path.GetFullPath(path) : Path.GetRelativePath(Path.GetDirectoryName(MapPath)!, Path.GetFullPath(path)).Replace('\\', '/'));
-            Evidence = ev;
-            Refresh();
-            Say($"The old system's code ({ev.Source}) is evidence now: suggestions use its rules, and coverage says what it reads and writes.");
-        }
-        catch (Exception e) when (e is IOException or FormatException or UnauthorizedAccessException)
-        {
-            Say($"Couldn't read {Path.GetFileName(path)}: {e.Message}");
-        }
-    }
+    public void OpenEvidence(string path) => Work.OpenEvidence(path);
 
     /// <summary>Suggests mappings for everything not yet mapped (one undo step); nothing already mapped changes.</summary>
-    public Suggester.Result? Suggest()
-    {
-        if (Old == null || New == null) { Say("Open both schemas first."); return null; }
-        Suggester.Result? r = null;
-        Change("suggested mappings", () => r = Suggester.Suggest(Map, Old, New, Evidence));
-        Say(r!.Tables + r.Columns == 0 ? "Nothing to suggest: everything is mapped." : $"Suggested {r.Tables} table{(r.Tables == 1 ? "" : "s")} and {r.Columns} column{(r.Columns == 1 ? "" : "s")}: check each (amber) and confirm it. See Coverage for what's left." + (r.Notes.Count > 0 ? " " + string.Join(" ", r.Notes) : ""));
-        return r;
-    }
+    public Suggester.Result? Suggest() => Work.Suggest();
 
     /// <summary>Confirms suggestions: one column, a whole table, or every suggestion marked sure.</summary>
-    public int Confirm(string? table = null, string? column = null, bool sureOnly = false)
-    {
-        var n = 0;
-        Change(column != null ? $"confirmed {table}.{column}" : table != null ? $"confirmed {table}" : "confirmed the sure suggestions", () =>
-        {
-            foreach (var tm in Map.Tables.Where(t => table == null || t.Target.Equals(table, StringComparison.OrdinalIgnoreCase)))
-            {
-                if (column == null && tm.Certainty != Certainty.Confirmed && (!sureOnly || tm.Certainty == Certainty.Sure)) { tm.Certainty = Certainty.Confirmed; n++; }
-                foreach (var c in tm.Columns.Where(c => column == null || c.Target.Equals(column, StringComparison.OrdinalIgnoreCase)))
-                    if (c.Certainty != Certainty.Confirmed && (!sureOnly || c.Certainty == Certainty.Sure)) { c.Certainty = Certainty.Confirmed; n++; }
-            }
-        });
-        Say($"Confirmed {n}.");
-        return n;
-    }
+    public int Confirm(string? table = null, string? column = null, bool sureOnly = false) => Work.Confirm(table, column, sureOnly);
 
-    /// <summary>Records that an old table or column isn't migrated, and why (the coverage report then shows it dropped).</summary>
-    public void Drop(string about, string why) =>
-        Change($"dropped {about}", () =>
-        {
-            Map.Decisions.RemoveAll(d => d.About.Equals(about, StringComparison.OrdinalIgnoreCase));
-            Map.Decisions.Add(new Decision { About = about, Said = why, By = "person", At = DateTime.Now });
-        });
+    /// <summary>Records that an old table or column isn't migrated, and why.</summary>
+    public void Drop(string about, string why) => Work.Drop(about, why);
 
     partial void Changed()
     {
-        CoverageItems = Coverage.Of(Map, Old, New, Evidence);
+        CoverageItems = Work.Coverage;
         ShowCoverage();
         ShowEvidence();
         AfterChange();
