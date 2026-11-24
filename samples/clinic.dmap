@@ -1,0 +1,114 @@
+{
+  "format": "avadatamapper.map",
+  "version": 1,
+  "name": "Clinic: legacy to rebuild",
+  "source": {
+    "name": "old",
+    "dialect": "sqlite",
+    "file": "old/clinic-old.db",
+    "described": "clinic-old.db"
+  },
+  "target": {
+    "name": "new",
+    "dialect": "sqlite",
+    "file": "new/clinic-new.db",
+    "described": "clinic-new.db"
+  },
+  "tables": [
+    {
+      "target": "payer",
+      "from": "tblPayer",
+      "columns": [
+        { "target": "payer_id", "kind": "generated" },
+        { "target": "payer_code", "kind": "direct", "from": "PayerCode", "trim": true },
+        { "target": "name", "kind": "direct", "from": "PayerName" },
+        { "target": "copay_percent", "kind": "direct", "from": "CopayPct", "ifNull": 0, "reason": "A payer with no copay on file pays none." },
+        { "target": "phone", "kind": "direct", "from": "Phone" }
+      ]
+    },
+    {
+      "target": "sex_codes",
+      "columns": [
+        { "target": "code", "kind": "direct", "from": "code" },
+        { "target": "meaning", "kind": "direct", "from": "meaning" }
+      ],
+      "rows": [
+        { "code": "M", "meaning": "Male" },
+        { "code": "F", "meaning": "Female" },
+        { "code": "U", "meaning": "Unknown" }
+      ]
+    },
+    {
+      "target": "claim_status",
+      "columns": [
+        { "target": "code", "kind": "direct", "from": "code" },
+        { "target": "meaning", "kind": "direct", "from": "meaning" }
+      ],
+      "rows": [
+        { "code": "OPEN", "meaning": "Entered, not sent" },
+        { "code": "SENT", "meaning": "Sent to the payer" },
+        { "code": "PAID", "meaning": "Paid" },
+        { "code": "DENIED", "meaning": "Denied" },
+        { "code": "VOID", "meaning": "Voided" }
+      ]
+    },
+    {
+      "target": "patient",
+      "from": "tblPatient",
+      "where": "Deleted = 0",
+      "columns": [
+        { "target": "patient_id", "kind": "generated" },
+        { "target": "family_name", "kind": "split", "from": "PatName", "separator": ",", "part": 1, "trim": true },
+        { "target": "given_name", "kind": "split", "from": "PatName", "separator": ",", "part": 2, "trim": true },
+        { "target": "birth_date", "kind": "convert", "from": "DOB", "as": "date", "formats": [ "MM/dd/yyyy", "yyyyMMdd", "yyyy-MM-dd", "M/d/yyyy" ], "blankIsNull": true, "unknown": "reject" },
+        { "target": "sex_code", "kind": "lookup", "from": "Sex", "table": "sex_codes", "map": { "M": "M", "F": "F", "U": "U" }, "ifNull": "U", "unknown": "reject" },
+        { "target": "payer_id", "kind": "key", "from": "PayerCode", "table": "payer" },
+        { "target": "phone", "kind": "direct", "from": "Phone" },
+        { "target": "is_active", "kind": "convert", "from": "Active", "as": "bool", "map": { "Y": true, "N": false }, "unknown": "reject" },
+        { "target": "created_by", "kind": "direct", "from": "EnteredBy", "ifNull": "MIGRATION", "reason": "Rows from before 2004 have no EnteredBy." }
+      ]
+    },
+    {
+      "target": "visit",
+      "from": "tblVisit",
+      "columns": [
+        { "target": "visit_id", "kind": "generated" },
+        { "target": "patient_id", "kind": "key", "from": "PatID", "table": "patient" },
+        { "target": "visit_at", "kind": "direct", "from": "VisitDt" },
+        { "target": "clinician", "kind": "direct", "from": "Clinician" },
+        { "target": "reason", "kind": "direct", "from": "Reason" }
+      ]
+    },
+    {
+      "target": "charge",
+      "from": "tblCharge",
+      "columns": [
+        { "target": "charge_id", "kind": "generated" },
+        { "target": "patient_id", "kind": "key", "from": "PatID", "table": "patient" },
+        { "target": "visit_id", "kind": "key", "from": "VisitID", "table": "visit" },
+        { "target": "procedure_code", "kind": "direct", "from": "ProcCode" },
+        { "target": "amount", "kind": "direct", "from": "Amt" },
+        { "target": "copay", "kind": "direct", "from": "Copay", "ifNull": 0 },
+        { "target": "posted_at", "kind": "direct", "from": "PostedOn" }
+      ]
+    },
+    {
+      "target": "claim",
+      "from": "tblClaim",
+      "columns": [
+        { "target": "claim_id", "kind": "generated" },
+        { "target": "claim_number", "kind": "direct", "from": "ClaimNo" },
+        { "target": "patient_id", "kind": "key", "from": "PatID", "table": "patient" },
+        { "target": "amount", "kind": "direct", "from": "Amt" },
+        { "target": "status", "kind": "lookup", "from": "Status", "trim": true, "table": "claim_status", "map": { "OPEN": "OPEN", "SENT": "SENT", "PAID": "PAID", "DENIED": "DENIED", "VOID": "VOID" }, "unknown": "reject" },
+        { "target": "entered_at", "kind": "direct", "from": "EnteredOn" },
+        { "target": "source_system", "kind": "constant", "value": "CLINIC2006", "reason": "Every claim before the rebuild came from the 2006 system." }
+      ]
+    }
+  ],
+  "decisions": [
+    { "about": "tblPatient.Fax", "said": "Dropped: the practice stopped faxing in 2019.", "by": "person", "at": "2026-11-24T09:00:00" },
+    { "about": "FaxQueue", "said": "Dropped: the 2006 referral system's queue; nothing reads or writes it.", "by": "person", "at": "2026-11-24T09:00:00" },
+    { "about": "tblPatient.Deleted", "said": "Deleted patients aren't migrated (the patient table's filter).", "by": "person", "at": "2026-11-24T09:00:00" }
+  ]
+}
