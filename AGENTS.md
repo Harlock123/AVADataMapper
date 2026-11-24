@@ -8,7 +8,9 @@ how the code is put together and the rules that keep it working.
 A data migration mapper in C# on .NET 10 and Avalonia 11.3: it reads an old database's schema and a new one's (live
 catalogs of SQL Server, PostgreSQL and SQLite, or DDL scripts), and keeps a mapping (`.dmap`) of how each new table and
 column is filled from the old. It is the step between rebuilding a system (AVALegacyLens, AVAUIDesigner) and proving
-the rebuild matches (AVAParityCheck).
+the rebuild matches (AVAParityCheck). It profiles the old data, dry-runs and runs the migration under a journal (rerun,
+roll back), writes the script, the parity suite and the sign-off report, and has an AI Chat (F12) and an MCP server
+(`--mcp`, `--mcp --attach`, `--http`, port 8778), with values masked for agents unless the person allows them.
 
 ## Commands
 
@@ -18,7 +20,7 @@ dotnet test AVADataMapper.slnx
 dotnet run --project src/AVADataMapper [map.dmap]
 dotnet run --project src/AVADataMapper -- --mcp --root samples   # the MCP server with no window (--attach: the open one)
 cd samples && python3 make_samples.py        # remakes the sample databases (deterministic: tests count their rows)
-MAPPER_SHOTS=/tmp/shots dotnet test --filter Screenshots                 # the README's pictures, headless
+MAPPER_SHOTS=Screenshots dotnet test --filter Screenshots          # the README's pictures, headless
 MAPPER_TEST_MSSQL="Server=localhost,11453;User Id=sa;Password=…;TrustServerCertificate=True" \
 MAPPER_TEST_PG="Host=localhost;Port=15452;Username=postgres;Password=…;Database=postgres" dotnet test   # live servers
 MAPPER_PARITYCHECK=~/RiderProjects/AVAParityCheck dotnet test --filter HandoffTests   # AVAParityCheck passes the suite
