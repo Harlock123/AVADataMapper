@@ -39,14 +39,18 @@ docker run -d --name dm-mssql -e ACCEPT_EULA=1 -e MSSQL_SA_PASSWORD='…' -p 114
     (live catalogs: SQL Server's sys views, PostgreSQL's pg_catalog, SQLite's pragmas; never a row), `SchemaFiles`
     (a SQLite file or a DDL script) and `SavedConnections` (connection strings by name, in the settings folder).
   - `Mapping/`: `MapFile` (the `.dmap`: `Side`, `TableMap`, `ColumnMap` with its `ColumnKind` and `Certainty`,
-    `Decision`), `Transforms` (what a column map does to a row's values), `Names` (names as words: prefixes dropped,
+    `Decision`), `Transforms` (what a column map does to an old row's values, then `Fit` to the new column: type, length,
+    precision, nulls; a value or a reason the row is rejected), `Expression` (the mapping's own small expression language
+    for filters and computed columns: not SQL, checked when written), `MapChecks` (M rules: the mapping against both
+    schemas before any row is read), `Names` (names as words: prefixes dropped,
     abbreviations spelled out, synonyms read the same), `Evidence` (an AVALegacyLens `.lens` read as plain JSON: who
     writes and reads each column, its rules tied to the columns their words name, dead tables), `Suggester` (fills a
     mapping's gaps: tables by name and columns, columns by name and type, keys through foreign keys, lookups into code
     tables, splits of a name column; each sure, likely or guessed, with its reason), `Coverage` (what's filled, what's
     required and empty, what's suggested, what's old and not read or dropped).
 - `src/AVADataMapper/`: the window, built in code (`MainWindow.cs`: the trees, the mapping tab, undo;
-  `MainWindow.Suggest.cs`: suggesting, confirming, the scan as evidence, the Coverage tab; `MainWindow.Parts.cs`: the
+  `MainWindow.Suggest.cs`: suggesting, confirming, the scan as evidence, the Coverage tab; `MainWindow.Checks.cs`: the
+  Checks tab and the Try box; `MainWindow.Parts.cs`: the
   hooks later parts fill; `ConnectDialog.cs`).
 - `tests/AVADataMapper.Tests/`: xUnit v3 on Avalonia.Headless. `LiveDatabases.cs` has the opt-in live servers.
 - `samples/`: an invented legacy clinic database (`old/`: SQL Server DDL and rows, and a SQLite copy) and its rebuild
@@ -67,6 +71,9 @@ docker run -d --name dm-mssql -e ACCEPT_EULA=1 -e MSSQL_SA_PASSWORD='…' -p 114
   guessed with a reason, and a person confirms it. Evidence makes a suggestion likelier; it never confirms one.
 - **A window test that fails leaves its window open, and Avalonia's reset then fails with `fonts:SystemFonts`,** which
   hides the real failure and breaks the tests after it: close windows in `finally`.
+- **One transform, everywhere.** The Try box, the dry run, the migration and the parity plan all go through
+  `Transforms.Apply`, so what's tried is what's done. Expressions are the mapping's own language, never SQL passed to a
+  database.
 - **No real data in the repository.** Every person, payer and number in the samples is invented.
 
 ## Making a change

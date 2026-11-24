@@ -89,7 +89,11 @@ public sealed partial class MainWindow
         CoverageItems = Coverage.Of(Map, Old, New, Evidence);
         ShowCoverage();
         ShowEvidence();
+        AfterChange();
     }
+
+    /// <summary>After every change: later parts refresh what they show.</summary>
+    partial void AfterChange();
 
     private void ShowCoverage()
     {
@@ -170,6 +174,7 @@ public sealed partial class MainWindow
     private partial IEnumerable<TabItem> MoreTabs() =>
     [
         new TabItem { Header = "Coverage", Content = new ScrollViewer { Content = CoveragePanel }, FontSize = 14 },
+        new TabItem { Header = "Checks", Content = new ScrollViewer { Content = ChecksPanel }, FontSize = 14 },
         .. LaterTabs(),
     ];
 
@@ -198,7 +203,7 @@ public sealed partial class MainWindow
     ];
 
     private partial IEnumerable<object> MoreViewItems(Func<string, Action, Key?, KeyModifiers, MenuItem> item) =>
-        [item("_Coverage", () => Tabs.SelectedIndex = 1, Key.D2, KeyModifiers.Control), .. LaterViewItems(item)];
+        [item("_Coverage", () => Tabs.SelectedIndex = 1, Key.D2, KeyModifiers.Control), item("C_hecks", () => Tabs.SelectedIndex = 2, Key.D3, KeyModifiers.Control), .. LaterViewItems(item)];
 
     private async Task OpenEvidencePicked()
     {

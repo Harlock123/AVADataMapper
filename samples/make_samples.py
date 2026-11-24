@@ -225,7 +225,7 @@ def rows():
         if i == 8: name = "CHER"                # one name, no comma
         if i == 9: sex = "X"                    # a code the new table doesn't have
         if i == 10: sex = None                  # unknown sex: the new column is required
-        if i == 11: name = "VAN DER BERG-ELLINGTON-WORTHINGTONSMYTHE, ARABELLA"   # family name over 40
+        if i == 11: name = "VAN DER BERG-ELLINGTON-WORTHINGTON-SMYTHE, ARABELLA"   # family name over 40 (41)
         if i == 12: payer = None                # self-referred: no payer
         if i == 13: active = "y"                # lower case
         if i == 14: deleted = 1                 # deleted: not migrated

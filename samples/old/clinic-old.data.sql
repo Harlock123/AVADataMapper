@@ -16,7 +16,7 @@ INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, 
 INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, Fax, Deleted, EnteredBy) VALUES (8, 'CHER', '05/25/1984', 'M', 'SUN01', 'Y', '5555550108', NULL, 0, 'FRONTDESK');
 INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, Fax, Deleted, EnteredBy) VALUES (9, 'PRENTICE, WALLACE', '19971028', 'X', 'MDCR', 'N', NULL, NULL, 0, 'IMPORT2011');
 INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, Fax, Deleted, EnteredBy) VALUES (10, 'WHITCOMB, KEZIAH', '1950-03-03', NULL, 'BLUE7', 'Y', '5555550110', '5555550210', 0, 'WEBFORM');
-INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, Fax, Deleted, EnteredBy) VALUES (11, 'VAN DER BERG-ELLINGTON-WORTHINGTONSMYTHE, ARABELLA', '8/6/1963', 'F', 'SELF', 'Y', '5555550111', NULL, 0, NULL);
+INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, Fax, Deleted, EnteredBy) VALUES (11, 'VAN DER BERG-ELLINGTON-WORTHINGTON-SMYTHE, ARABELLA', '8/6/1963', 'F', 'SELF', 'Y', '5555550111', NULL, 0, NULL);
 INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, Fax, Deleted, EnteredBy) VALUES (12, 'MERRIWEATHER, MAEVE', '01/09/1976', 'M', NULL, 'Y', NULL, NULL, 0, 'FRONTDESK');
 INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, Fax, Deleted, EnteredBy) VALUES (13, 'THORNBURY, DESMOND', '19890612', 'F', 'MDCR', 'y', '5555550113', NULL, 0, 'IMPORT2011');
 INSERT INTO dbo.tblPatient (PatID, PatName, DOB, Sex, PayerCode, Active, Phone, Fax, Deleted, EnteredBy) VALUES (14, 'CASTILLO, OPAL', '1942-11-15', 'M', 'BLUE7', 'Y', '5555550114', NULL, 1, 'WEBFORM');

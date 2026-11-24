@@ -224,6 +224,16 @@ public sealed partial class MainWindow : Window
         jsonHead.Children.Add(ColumnJsonTitle);
         DockPanel.SetDock(jsonHead, Dock.Top);
         json.Children.Add(jsonHead);
+        var tryRow = new DockPanel { Margin = new Thickness(0, 6, 0, 0) };
+        var tryLabel = new TextBlock { Text = "Try it on an old value:", Foreground = Look.Dim, FontSize = 12, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
+        DockPanel.SetDock(tryLabel, Dock.Left);
+        DockPanel.SetDock(TryBox, Dock.Left);
+        tryRow.Children.Add(tryLabel);
+        tryRow.Children.Add(TryBox);
+        tryRow.Children.Add(TryResult);
+        TryBox.TextChanged += (_, _) => TryIt();
+        DockPanel.SetDock(tryRow, Dock.Bottom);
+        json.Children.Add(tryRow);
         json.Children.Add(ColumnJson);
         var editor = new DockPanel();
         DockPanel.SetDock(head, Dock.Top);
@@ -550,9 +560,13 @@ public sealed partial class MainWindow : Window
         {
             _filling = false;
         }
+        Findings = Old != null && New != null ? MapChecks.Check(Map, Old, New) : [];
         ShowTable(_table, _column);
         Changed();
     }
+
+    /// <summary>The mapping checked against both schemas (empty until both are open).</summary>
+    public List<MapFinding> Findings { get; private set; } = [];
 
     private void FillTree(TreeView tree, DatabaseSchema? schema, Func<Table, bool> tableUsed, Func<Table, Column, bool> columnUsed)
     {
@@ -671,7 +685,18 @@ public sealed partial class MainWindow : Window
                     Text = cm == null ? (c.Identity ? "the new database numbers it" : c.Nullable ? "left empty" : c.Default != null ? $"its default ({c.Default})" : "nothing fills it, and it's required") : Describe(cm),
                     Foreground = cm?.Certainty is Certainty.Guessed or Certainty.Likely ? Look.Warn : Look.Code, FontSize = 12, TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0), [Grid.ColumnProperty] = 3,
                 };
-                row.Children.Add(how);
+                var said = Findings.Where(f => f.About.Equals($"{table.Name}.{c.Name}", StringComparison.OrdinalIgnoreCase)).ToList();
+                if (said.Count > 0)
+                {
+                    var stack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0), [Grid.ColumnProperty] = 3 };
+                    how.Margin = new Thickness(0);
+                    how.SetValue(Grid.ColumnProperty, 0);
+                    stack.Children.Add(how);
+                    foreach (var found in said)
+                        stack.Children.Add(new TextBlock { Text = $"{found.Rule.Id} {found.Message}", Foreground = found.Severity == Severity.Error ? Look.Reject : found.Severity == Severity.Warning ? Look.Deny : Look.Dim, FontSize = 11.5, TextWrapping = TextWrapping.Wrap });
+                    row.Children.Add(stack);
+                }
+                else row.Children.Add(how);
                 row.PointerPressed += (_, _) => ShowTable(table.Name, col);
                 Rows.Add(new ColumnRow(c, cm, row));
                 ColumnPanel.Children.Add(row);
@@ -686,6 +711,7 @@ public sealed partial class MainWindow : Window
             _filling = false;
         }
         ShowEvidence();
+        TryIt();
     }
 
     /// <summary>A column map in words: "split PatName at ',', part 1, trimmed".</summary>

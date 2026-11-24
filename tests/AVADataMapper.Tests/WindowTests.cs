@@ -149,3 +149,38 @@ public sealed class SuggestWindowTests
         finally { w.Close(); }
     });
 }
+
+public sealed class ChecksWindowTests
+{
+    [Fact]
+    public void The_checks_tab_lists_findings_rows_show_theirs_and_a_value_can_be_tried() => HeadlessApp.Run(() =>
+    {
+        var w = new MainWindow(Samples.Path("clinic.dmap"));
+        w.Show();
+        try
+        {
+            Assert.Equal(8, w.Findings.Count);
+            var text = string.Join("\n", w.ChecksPanel.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text));
+            Assert.Contains("0 errors (the migration can't run as mapped) and 8 warnings", text);
+            w.ShowTable("charge", "procedure_code");
+            var rows = string.Join("\n", w.ColumnPanel.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text));
+            Assert.Contains("M6 tblCharge.ProcCode holds up to 10 characters; procedure_code takes 5.", rows);
+            w.TryBox.Text = "99213-25";
+            w.TryIt();
+            Assert.Equal("Rejected: procedure_code takes 5 characters; \"99213-25\" has 8", w.TryResult.Text);
+            w.ShowTable("patient", "birth_date");
+            w.TryBox.Text = "19530604";
+            w.TryIt();
+            Assert.Equal("→ 1953-06-04", w.TryResult.Text);
+            w.TryBox.Text = "13/45/1980";
+            w.TryIt();
+            Assert.StartsWith("Rejected: DOB \"13/45/1980\" isn't a date", w.TryResult.Text);
+            // An error appears as soon as the mapping breaks.
+            w.SetColumn("patient", "birth_date", ColumnKind.Direct, "DOB");
+            Assert.Contains(w.Findings, f => f.Rule.Id == "M5" && f.About == "patient.birth_date");
+            w.Undo();
+            Assert.DoesNotContain(w.Findings, f => f.Rule.Id == "M5");
+        }
+        finally { w.Close(); }
+    });
+}

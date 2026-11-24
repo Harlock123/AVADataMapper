@@ -33,8 +33,12 @@ public sealed class Screenshots
             foreach (var item in w.NewTree.Items.OfType<TreeViewItem>().Skip(3).Take(1)) item.IsExpanded = true;
             w.ShowTable("patient", "family_name");
             Save(w, Path.Combine(dir, "mapping.png"));
-            w.Tabs.SelectedIndex = 1;
-            Save(w, Path.Combine(dir, "coverage-done.png"));
+            w.Tabs.SelectedIndex = 2;
+            Save(w, Path.Combine(dir, "checks.png"));
+            w.Tabs.SelectedIndex = 0;
+            w.ShowTable("charge", "procedure_code");
+            w.TryBox.Text = "99213-25";
+            Save(w, Path.Combine(dir, "try.png"));
         }
         finally { w.Close(); }
     });
